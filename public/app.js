@@ -696,3 +696,4 @@ function inspectTableRow(caseId) {
     viewCaseEvidence(c);
   }
 }
+

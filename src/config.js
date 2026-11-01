@@ -34,3 +34,4 @@ export const RESTRICTED_REGIONS = [
   'IR', 'IQ', 'LY', 'MM', 'NI', 'KP', 'PK', 'RU',
   'SO', 'SY', 'VE', 'EH'
 ];
+

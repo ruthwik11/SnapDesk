@@ -45,3 +45,4 @@ testEndpoints().catch((err) => {
   console.error('Server endpoint test failed:', err);
   process.exit(1);
 });
+

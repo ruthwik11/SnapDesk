@@ -65,3 +65,4 @@ export function generateTimelineNarrative(agentTrace) {
     return `[${time}] ${step.step.toUpperCase()}: ${step.detail}`;
   }).join('\n');
 }
+
