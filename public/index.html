@@ -3,439 +3,1029 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnapDesk - Customer Support That Can See | Autonomous Visual Agent</title>
+  <title>SnapDesk — Beyond Customer Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Navigation Header -->
-  <header>
-    <div class="nav-container">
-      <div class="brand">
-        <div class="brand-icon">S</div>
-        <div>
-          <span class="brand-title">SnapDesk</span>
-          <span id="modeBadge" class="brand-badge badge-mock">Mock Mode</span>
+  <!-- ========================================================================= -->
+  <!-- JAPANESE-INSPIRED CURTAIN ROLL-UP REVEAL                                  -->
+  <!-- ========================================================================= -->
+  <div id="curtainOverlay" class="curtain-overlay">
+    <div class="curtain-panel curtain-left"></div>
+    <div class="curtain-panel curtain-right"></div>
+    <div class="curtain-cord">
+      <div class="cord-handle">
+        <span class="cord-knot"></span>
+        <span class="cord-text">SNAPDESK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: CINEMATIC LANDING PAGE (HERO + ACCOUNT SELECTION)                -->
+  <!-- ========================================================================= -->
+  <div id="landingPageView" class="landing-page-view">
+    
+    <!-- FULL-SCREEN HERO (100svh) -->
+    <section id="heroSection" class="hero-section">
+      <!-- Ambient orbital & celestial geometry -->
+      <div class="celestial-orbit orbit-1"></div>
+      <div class="celestial-orbit orbit-2"></div>
+      <div class="warm-atmospheric-glow"></div>
+
+      <!-- Top Bar: Brand Lockup -->
+      <div class="hero-topbar">
+        <div class="brand-lockup">
+          <img src="assets/logo.png" alt="SnapDesk Logo" class="brand-logo-img">
+          <span class="brand-wordmark">SnapDesk</span>
+        </div>
+        <div class="hero-meta-badge">
+          <span class="pulse-dot"></span>
+          <span id="landingModeTag">Meta Model API Connected</span>
         </div>
       </div>
-      <nav class="nav-tabs">
-        <button class="nav-tab active" data-tab="intake">1. Customer Intake</button>
-        <button class="nav-tab" data-tab="evidence">2. Visual Evidence</button>
-        <button class="nav-tab" data-tab="policies">3. Policy Engine &amp; Flip</button>
-        <button class="nav-tab" data-tab="operations">4. Ops &amp; Accuracy</button>
-      </nav>
-    </div>
-  </header>
 
-  <main>
+      <!-- Central Editorial Visual & Typography -->
+      <div class="hero-content">
+        <div class="central-focal-orb">
+          <div class="orb-inner-aperture">
+            <svg class="aperture-reticle" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="4,6"/>
+              <circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" stroke-width="0.5"/>
+              <line x1="50" y1="2" x2="50" y2="16" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="50" y1="84" x2="50" y2="98" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="2" y1="50" x2="16" y2="50" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="84" y1="50" x2="98" y2="50" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+          </div>
+        </div>
 
-    <!-- ==================== TAB 1: CUSTOMER INTAKE ==================== -->
-    <section id="tab-intake" class="tab-pane active">
-      <div class="page-header">
-        <h1>Submit a Visual Claim</h1>
-        <p>SnapDesk measures damage directly from photos &amp; video with SAM 3.1 and applies business policy autonomously.</p>
+        <h1 class="hero-main-title">Beyond Customer Support.</h1>
+        <p class="hero-subline">BUILT WITH PURPOSE, MADE FOR PEOPLE.</p>
+        
+        <div class="hero-scroll-indicator" onclick="scrollToAccounts()">
+          <span class="scroll-label">Select Account Type</span>
+          <div class="scroll-arrow">↓</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONE-FULL-SCROLL ACCOUNT SELECTION SECTION -->
+    <section id="accountsSection" class="accounts-section">
+      <div class="accounts-container">
+        <div class="accounts-header">
+          <span class="eyebrow">CHOOSE YOUR PORTAL</span>
+          <h2>Select Account Access</h2>
+          <p>SnapDesk separates enterprise multi-tenant administration from customer dispute resolution.</p>
+        </div>
+
+        <div class="accounts-grid">
+          <!-- CARD 1: BUSINESS -->
+          <div class="account-card card-business">
+            <div class="card-badge">ENTERPRISE TENANT</div>
+            <div class="card-icon">🏛️</div>
+            <h3>Business Portal</h3>
+            <p>For merchants, retail operations, and claims adjusters. Manage policies, configure automated thresholds, review human escalations, and monitor inspection accuracy.</p>
+            
+            <ul class="card-feature-list">
+              <li>✓ Independent Tenant Isolation &amp; Policy Versions</li>
+              <li>✓ Deterministic Decision Thresholds Editor</li>
+              <li>✓ Product Damage &amp; Return Analytics</li>
+              <li>✓ Human-Review Queue &amp; Case Audit Logs</li>
+            </ul>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary" onclick="openAuthModal('business', 'login')">Business Login</button>
+              <button type="button" class="btn btn-outline" onclick="openAuthModal('business', 'register')">Register Company</button>
+            </div>
+          </div>
+
+          <!-- CARD 2: CUSTOMER -->
+          <div class="account-card card-customer">
+            <div class="card-badge">DISPUTE RESOLUTION</div>
+            <div class="card-icon">📦</div>
+            <h3>Customer Portal</h3>
+            <p>For buyers and product recipients. File visual damage claims for parcels, appliances, or rentals with automated SAM 3.1 computer-vision measurement.</p>
+
+            <ul class="card-feature-list">
+              <li>✓ Submit Visual Claims (Photo/Video/Audio)</li>
+              <li>✓ Real-Time SAM 3.1 Damage Quantification</li>
+              <li>✓ Policy-Grounded Instant Explanations</li>
+              <li>✓ Track Case Status &amp; Evidence Packages</li>
+            </ul>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-gold" onclick="openAuthModal('customer', 'login')">Customer Login</button>
+              <button type="button" class="btn btn-outline" onclick="openAuthModal('customer', 'register')">Create Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- AUTHENTICATION MODAL (SEPARATE BUSINESS VS CUSTOMER)                      -->
+  <!-- ========================================================================= -->
+  <div id="authModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <button type="button" class="modal-close-btn" onclick="closeAuthModal()">✕</button>
+      
+      <div class="modal-header">
+        <div id="authModalBadge" class="modal-badge">BUSINESS ACCOUNT</div>
+        <h3 id="authModalTitle">Sign in to SnapDesk</h3>
+        <p id="authModalSubtitle">Enter your credentials to access your tenant dashboard.</p>
       </div>
 
-      <div class="grid-2">
-        <!-- Intake Form -->
-        <div class="card">
-          <div class="card-title">
-            <span>Claim Submission</span>
-            <span style="font-size: 0.8rem; color: #94a3b8;">End-to-End Visual Agent</span>
-          </div>
-
-          <!-- Quick Test Presets -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <!-- Business Registration Only Fields -->
+        <div id="businessExtraFields" style="display: none;">
           <div class="form-group">
-            <label class="form-label">Quick Test Presets (Instant Demo):</label>
-            <div class="preset-chips">
-              <button type="button" class="preset-chip" onclick="loadPreset('crushed_box')">📦 Crushed Box ($45)</button>
-              <button type="button" class="preset-chip" onclick="loadPreset('broken_vase')">🏺 Shattered Vase ($85)</button>
-              <button type="button" class="preset-chip" onclick="loadPreset('scratched_appliance')">📻 Scratched Appliance ($60)</button>
-              <button type="button" class="preset-chip" onclick="loadPreset('high_val_laptop')">💻 High-Value Item ($1,450)</button>
-              <button type="button" class="preset-chip" onclick="loadPreset('blurry_frame')">🌫️ Ambiguous Frame ($35)</button>
-            </div>
+            <label class="form-label" for="regBusinessName">Company / Merchant Name *</label>
+            <input type="text" id="regBusinessName" class="form-input" placeholder="e.g. Apex Global Logistics">
           </div>
+          <div class="form-group">
+            <label class="form-label" for="regBusinessCategory">Industry / Sector</label>
+            <select id="regBusinessCategory" class="form-select">
+              <option value="E-Commerce & Logistics">E-Commerce &amp; Logistics</option>
+              <option value="Consumer Electronics & Appliances">Consumer Electronics &amp; Appliances</option>
+              <option value="Automotive & Mobility Rentals">Automotive &amp; Mobility Rentals</option>
+              <option value="Retail & Luxury Goods">Retail &amp; Luxury Goods</option>
+            </select>
+          </div>
+        </div>
 
-          <form id="claimForm">
-            <!-- Policy Selection -->
-            <div class="form-group">
-              <label class="form-label" for="policySelect">Business Policy Template:</label>
-              <select id="policySelect" class="form-select"></select>
-            </div>
+        <!-- Registration Name Field -->
+        <div id="nameFieldGroup" class="form-group" style="display: none;">
+          <label class="form-label" for="authName">Your Full Name *</label>
+          <input type="text" id="authName" class="form-input" placeholder="e.g. Sarah Jenkins">
+        </div>
 
-            <!-- Media Upload / Dropzone -->
-            <div class="form-group">
-              <label class="form-label">Visual Media (Photo or Video):</label>
-              <div id="dropzone" class="dropzone">
-                <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;">
-                <p id="dropzoneText">📸 Click or Drag &amp; Drop photo or video clip</p>
-                <div id="previewContainer" class="dropzone-preview">
-                  <img id="previewImage" alt="Preview">
+        <div class="form-group">
+          <label class="form-label" for="authEmail">Email Address *</label>
+          <input type="email" id="authEmail" class="form-input" required placeholder="name@company.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="authPassword">Password *</label>
+          <input type="password" id="authPassword" class="form-input" required placeholder="••••••••••••">
+        </div>
+
+        <!-- Quick Demo Account Fillers -->
+        <div class="demo-account-pills">
+          <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">Demo Accounts:</span>
+          <button type="button" class="demo-pill" onclick="quickFillAuth('admin@apex.com', 'ApexPass123!', 'business', 'login')">Apex Logistics Admin</button>
+          <button type="button" class="demo-pill" onclick="quickFillAuth('admin@nordic.com', 'NordicPass123!', 'business', 'login')">Nordic Appliances Admin</button>
+          <button type="button" class="demo-pill" onclick="quickFillAuth('sarah@customer.com', 'CustomerPass123!', 'customer', 'login')">Sarah (Customer)</button>
+        </div>
+
+        <div id="authErrorMsg" class="auth-error-banner" style="display: none;"></div>
+
+        <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+          Sign In
+        </button>
+      </form>
+
+      <div class="modal-footer">
+        <span id="authToggleText">Need an account?</span>
+        <button type="button" id="authToggleBtn" class="btn-link" onclick="toggleAuthMode()">Register here</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: CUSTOMER APPLICATION WORKSPACE                                    -->
+  <!-- ========================================================================= -->
+  <div id="customerAppView" class="app-view" style="display: none;">
+    <!-- Customer Header -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand-lockup" onclick="returnToLanding()">
+          <img src="assets/logo.png" alt="SnapDesk Logo" class="brand-logo-img sm">
+          <span class="brand-wordmark">SnapDesk</span>
+          <span class="header-portal-tag">Customer Portal</span>
+        </div>
+        <div class="header-user-menu">
+          <span id="customerUserName" class="user-greeting">Welcome, Sarah</span>
+          <button type="button" class="btn btn-sm btn-outline" onclick="logoutSession()">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body-container">
+      
+      <!-- SUB-NAVIGATION: 3 CUSTOMER SECTIONS -->
+      <nav class="customer-step-nav">
+        <button class="step-nav-btn active" id="btnNavSection1" onclick="showCustomerSection(1)">
+          <span class="step-num">1</span>
+          <span class="step-title">Raise a Ticket</span>
+        </button>
+        <button class="step-nav-btn disabled" id="btnNavSection2" onclick="showCustomerSection(2)">
+          <span class="step-num">2</span>
+          <span class="step-title">Vision Workspace</span>
+        </button>
+        <button class="step-nav-btn disabled" id="btnNavSection3" onclick="showCustomerSection(3)">
+          <span class="step-num">3</span>
+          <span class="step-title">Decision Engine</span>
+        </button>
+      </nav>
+
+      <!-- SECTION 1: CUSTOMER INTAKE (RAISE A TICKET) -->
+      <section id="customerSection1" class="customer-section-panel">
+        <div class="section-center-heading">
+          <h2>Raise a Ticket</h2>
+          <p>Submit visual evidence of damaged goods for autonomous policy assessment.</p>
+        </div>
+
+        <div class="intake-form-wrapper">
+          <form id="customerTicketForm" onsubmit="handleTicketSubmission(event)">
+            
+            <!-- Part 1: Customer Contact Details -->
+            <div class="form-fieldset">
+              <h4 class="fieldset-title">1. Customer Identification</h4>
+              <div class="grid-3">
+                <div class="form-group">
+                  <label class="form-label" for="custFullName">Full Name *</label>
+                  <input type="text" id="custFullName" class="form-input" required placeholder="e.g. Sarah Jenkins">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="custPhone">Contact Number *</label>
+                  <input type="tel" id="custPhone" class="form-input" required placeholder="e.g. +1 (555) 014-4900">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="custPostal">Postal / PIN Code *</label>
+                  <input type="text" id="custPostal" class="form-input" required placeholder="e.g. 94107">
                 </div>
               </div>
             </div>
 
-            <!-- Customer Message -->
-            <div class="form-group">
-              <label class="form-label" for="claimMessage">What happened? (Problem Explanation):</label>
-              <textarea id="claimMessage" class="form-textarea" placeholder="Describe the damage, packaging condition, or defect..."></textarea>
-            </div>
-
-            <!-- Audio Voice Note -->
-            <div class="form-group">
-              <label class="form-label">Voice Note (Muse Voice Transcribe):</label>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <button type="button" id="recordVoiceBtn" class="btn btn-secondary btn-sm" onclick="toggleVoiceSimulation()">
-                  🎙️ Simulate Voice Note
-                </button>
-                <span id="voiceStatus" style="font-size: 0.8rem; color: #94a3b8;">No voice note attached</span>
+            <!-- Part 2: Product Provider Selection (Mandatory Businesses Only) -->
+            <div class="form-fieldset">
+              <h4 class="fieldset-title">2. Order &amp; Merchant Information</h4>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="custProviderSelect">Select your product Provider *</label>
+                  <select id="custProviderSelect" class="form-select" required>
+                    <option value="" disabled selected>Loading active business providers...</option>
+                  </select>
+                  <span class="field-hint">Dynamic registry of active merchant accounts.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="custProductCost">Product cost (optional)</label>
+                  <div class="input-with-symbol">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="custProductCost" class="form-input pl-symbol" step="0.01" min="0" placeholder="0.00">
+                  </div>
+                  <span class="field-hint">Customer-reported amount (unverified).</span>
+                </div>
               </div>
             </div>
 
-            <!-- Order Value -->
-            <div class="form-group">
-              <label class="form-label" for="orderValue">Order Value (USD $):</label>
-              <input type="number" id="orderValue" class="form-input" value="45.00" step="0.01" min="0">
+            <!-- Part 3: Visual Media Upload (Photos or Videos with individual X buttons) -->
+            <div class="form-fieldset">
+              <h4 class="fieldset-title">3. Visual Evidence</h4>
+              <div class="form-group">
+                <label class="form-label">Photos or videos of the parcel/product *</label>
+                
+                <div id="mediaDropzone" class="media-upload-dropzone" onclick="triggerFileInput()">
+                  <input type="file" id="ticketMediaInput" multiple accept="image/*,video/*" style="display: none;" onchange="handleStagedMediaSelection(event)">
+                  <div class="dropzone-prompt">
+                    <span class="upload-icon">📸</span>
+                    <strong>Click or drop photos or videos here</strong>
+                    <span class="upload-sub">Supports JPG, PNG, WEBP, and MP4 clips (up to 32MB)</span>
+                  </div>
+                </div>
+
+                <!-- Staged Media Previews (Client-side only before Submit!) -->
+                <div id="stagedMediaContainer" class="staged-media-grid" style="display: none;"></div>
+              </div>
+
+              <!-- Part 4: Written Complaint -->
+              <div class="form-group">
+                <label class="form-label" for="custConcernText">Explain your concern *</label>
+                <textarea id="custConcernText" class="form-textarea" required rows="3" placeholder="Describe the condition, outer box crushing, structural breakage, or missing components..."></textarea>
+              </div>
+
+              <!-- Part 5: Optional Voice Note (Audio only) -->
+              <div class="form-group">
+                <label class="form-label">Please explain your concern in a voice note. (optional)</label>
+                <div class="audio-upload-bar">
+                  <input type="file" id="custAudioInput" accept="audio/*,.wav,.mp3,.m4a" onchange="handleAudioSelection(event)">
+                  <span id="audioStatusText" class="audio-status-label">No voice note selected (Audio files only)</span>
+                </div>
+              </div>
             </div>
 
-            <button type="submit" id="submitClaimBtn" class="btn btn-block">
-              ⚡ Submit Claim to Autonomous Agent
-            </button>
-          </form>
-
-          <!-- Live Agent Progress Animation -->
-          <div id="pipelineProgress" class="pipeline-progress">
-            <div class="progress-header">
-              <div class="progress-spinner"></div>
-              <span>Autonomous Agent Pipeline Running...</span>
-            </div>
-            <div class="progress-steps">
-              <div id="step-intake" class="progress-step-item"><div class="step-dot"></div><span>1. Ingesting media &amp; SHA-256 integrity hash</span></div>
-              <div id="step-sam" class="progress-step-item"><div class="step-dot"></div><span>2. SAM 3.1 visual segmentation &amp; damage quantification</span></div>
-              <div id="step-spark" class="progress-step-item"><div class="step-dot"></div><span>3. Muse Spark multimodal policy reasoning</span></div>
-              <div id="step-guardrails" class="progress-step-item"><div class="step-dot"></div><span>4. Plain-code deterministic financial guardrails</span></div>
-              <div id="step-evidence" class="progress-step-item"><div class="step-dot"></div><span>5. Compiling vector SVG evidence packet</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Intake Result Card -->
-        <div class="card" id="resultContainer" style="display: flex; flex-direction: column; justify-content: center;">
-          <div class="card-title">
-            <span>Agent Resolution</span>
-            <span id="resultCaseId" style="font-size: 0.8rem; font-family: monospace; color: #94a3b8;">Waiting for submission...</span>
-          </div>
-
-          <div id="emptyResultPlaceholder" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
-            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🤖</div>
-            <p>Submit a claim or click a preset above to watch the autonomous visual agent triaging damage in real time.</p>
-          </div>
-
-          <div id="activeResultContent" style="display: none;">
-            <div id="decisionBanner" class="decision-banner">
-              <div id="decisionBadge" class="decision-badge">PENDING</div>
-              <h2 id="decisionTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.35rem;">Outcome Title</h2>
-              <p id="decisionClause" style="font-size: 0.85rem; opacity: 0.9;"></p>
-            </div>
-
-            <div style="margin-bottom: 1rem;">
-              <label class="form-label">Customer-Facing Response:</label>
-              <div id="customerReplyText" style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.85rem; font-size: 0.875rem; line-height: 1.45; color: #e2e8f0;"></div>
-            </div>
-
-            <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-              <button type="button" class="btn btn-secondary btn-block" onclick="viewCaseEvidence()">
-                🔍 Inspect Full SVG Evidence Packet
+            <!-- SUBMIT TICKET: THE ONLY PERSISTENCE TRIGGER -->
+            <div class="form-actions-bar">
+              <button type="submit" id="btnSubmitTicket" class="btn btn-primary btn-lg">
+                Submit Ticket
               </button>
+              <span class="submit-persistence-note">No ticket or server records are created before pressing Submit Ticket.</span>
             </div>
-          </div>
+          </form>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ==================== TAB 2: AGENT EVIDENCE ==================== -->
-    <section id="tab-evidence" class="tab-pane">
-      <div class="page-header">
-        <h1>Visual Evidence &amp; Audit Trail</h1>
-        <p>Inspect SAM 3.1 computer-vision vector segmentations, deterministic guardrails, and the full step-by-step agent trace.</p>
-      </div>
-
-      <div class="grid-2">
-        <!-- Visual Inspector with SVG Overlay -->
-        <div class="card">
-          <div class="card-title">
-            <span>SAM 3.1 Damage Segmentation</span>
-            <span id="evidenceRatioBadge" class="brand-badge badge-real">0.0% Damaged</span>
-          </div>
-
-          <div class="visual-viewer" id="visualViewer">
-            <img id="evidenceImage" alt="Claim Media" src="assets/box_crushed.svg">
-            <div id="svgOverlayLayer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
-          </div>
-
-          <div class="visual-controls">
-            <button type="button" class="btn btn-secondary btn-sm" id="toggleMaskBtn" onclick="toggleOverlayLayer('mask')">Toggle Masks</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="toggleBoxBtn" onclick="toggleOverlayLayer('box')">Toggle Boxes</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="exportEvidenceJson()">Export Evidence JSON</button>
-          </div>
-
-          <div style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8;">
-            <p><strong>Vector Overlay Rendering:</strong> Generated in plain code directly from SAM 3.1 mask paths decoded by <code>@meta-sam/parser</code>. No image-generation models used (compliant with Meta Geographic Use Policy).</p>
-          </div>
-        </div>
-
-        <!-- Guardrail Checklist & Agent Trace -->
-        <div class="card">
-          <div class="card-title">
-            <span>Deterministic Guardrails &amp; Trace</span>
-            <span id="evidenceStatusPill" class="status-pill status-auto">AUTO-RESOLVED</span>
-          </div>
-
-          <!-- Guardrail Checklist -->
-          <div style="margin-bottom: 1.25rem;">
-            <label class="form-label">Plain-Code Guardrails Override (Safety Verification):</label>
-            <div class="guardrail-list">
-              <div class="guardrail-item">
-                <span>Duplicate Media Check (SHA-256 Anti-Fraud)</span>
-                <span id="guardrailDuplicate" class="guardrail-status-pass">✓ PASSED</span>
-              </div>
-              <div class="guardrail-item">
-                <span>Product Boundary Detected (SAM 3.1)</span>
-                <span id="guardrailProduct" class="guardrail-status-pass">✓ PASSED</span>
-              </div>
-              <div class="guardrail-item">
-                <span>Financial Cap (Order Value Limit)</span>
-                <span id="guardrailValue" class="guardrail-status-pass">✓ PASSED</span>
-              </div>
-              <div class="guardrail-item">
-                <span>Model Confidence Threshold</span>
-                <span id="guardrailConfidence" class="guardrail-status-pass">✓ PASSED</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Agent Trace Timeline -->
+      <!-- SECTION 2: VISION / DAMAGE ANALYSIS WORKSPACE -->
+      <section id="customerSection2" class="customer-section-panel" style="display: none;">
+        <div class="case-sub-header">
           <div>
-            <label class="form-label">Autonomous Agent Trace (Live Tool Loop):</label>
-            <div id="agentTraceContainer" class="agent-trace-list">
-              <!-- Dynamically populated trace items -->
+            <span class="eyebrow" id="s2CaseTag">CASE #PENDING</span>
+            <h2 id="s2CustomerHeading">Damage Inspection Workspace</h2>
+          </div>
+          <div class="case-meta-right">
+            <span class="meta-label">Selected Business:</span>
+            <strong id="s2BusinessName">—</strong>
+          </div>
+        </div>
+
+        <div class="vision-workspace-grid">
+          <!-- Left: Media Viewer with SAM 3.1 Overlays -->
+          <div class="card vision-media-card">
+            <div class="card-title">
+              <span>Visual Evidence Inspection</span>
+              <div class="layer-toggles">
+                <button type="button" class="btn-toggle active" id="btnToggleMasks" onclick="toggleVisionLayer('mask')">Masks</button>
+                <button type="button" class="btn-toggle active" id="btnToggleBoxes" onclick="toggleVisionLayer('box')">Boxes</button>
+              </div>
+            </div>
+
+            <div class="viewer-canvas-frame" id="viewerFrame">
+              <img id="visionDisplayImage" src="assets/box_crushed.svg" alt="Submitted Evidence">
+              <div id="visionSvgLayer" class="svg-annotation-overlay"></div>
+            </div>
+
+            <!-- Video Player Controls if Video Uploaded -->
+            <div id="videoControlsBox" class="video-scrubber-box" style="display: none;">
+              <div class="video-timeline-header">
+                <span class="timeline-title">Video Event Markers (SAM 3.1 Track)</span>
+                <span id="videoCurrentTime" class="time-readout">00:00:00.000</span>
+              </div>
+              <div id="videoEventPills" class="event-pills-row"></div>
+            </div>
+
+            <div class="measurement-readout-strip">
+              <div class="readout-item">
+                <span class="label">ESTIMATED VISIBLE-AREA RATIO:</span>
+                <strong id="readoutDamageRatio" class="value text-warning">0.0%</strong>
+              </div>
+              <div class="readout-item">
+                <span class="label">ASSESSMENT STATUS:</span>
+                <strong id="readoutAssessmentStatus" class="value text-info">Inconclusive</strong>
+              </div>
+              <div class="readout-item">
+                <span class="label">PRODUCT DETECTED:</span>
+                <strong id="readoutProductFound" class="value text-success">Verified</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Agent Resolution Progress & Damage Report Artifact -->
+          <div class="card vision-report-card">
+            <div class="card-title">
+              <span>Agent Resolution Progress</span>
+              <span id="agentResolutionBadge" class="status-pill status-analyzing">ANALYZING</span>
+            </div>
+
+            <!-- Real Backend Progress Stepper -->
+            <div id="visionProgressStepper" class="backend-stepper">
+              <div class="step-line-item done" id="vstep1">
+                <span class="dot"></span>
+                <span class="title">1. Media Ingestion &amp; Signature Validation</span>
+              </div>
+              <div class="step-line-item active" id="vstep2">
+                <span class="dot"></span>
+                <span class="title">2. SAM 3.1 Vector Mask Segmentation &amp; Tracking</span>
+              </div>
+              <div class="step-line-item" id="vstep3">
+                <span class="dot"></span>
+                <span class="title">3. Deterministic Area Quantification (@meta-sam/parser)</span>
+              </div>
+              <div class="step-line-item" id="vstep4">
+                <span class="dot"></span>
+                <span class="title">4. Formulating Canonical Damage Report (ASD-STE100)</span>
+              </div>
+            </div>
+
+            <!-- Generated Canonical Damage Report Artifact -->
+            <div id="damageReportArtifactBox" class="damage-report-artifact">
+              <div class="report-artifact-header">
+                <h4 id="reportArtifactTitle">Damage Report - Sarah Jenkins</h4>
+                <span class="report-meta" id="reportArtifactId">REP-APX-8801</span>
+              </div>
+
+              <div class="report-findings-list" id="reportFindingsContent">
+                <p>Generating internal technical assessment report...</p>
+              </div>
+
+              <div class="report-footer-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="downloadDamageReportJson()">Export Canonical JSON</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="advanceToDecisionEngine()">Proceed to Decision Engine →</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ==================== TAB 3: POLICY ENGINE & FLIP ==================== -->
-    <section id="tab-policies" class="tab-pane">
-      <div class="page-header">
-        <h1>Policy Engine &amp; Live Flip Lab</h1>
-        <p><strong>The Policy is the Only Configuration.</strong> Edit rules or compile policies from prose. Demonstrate how changing a threshold flips the decision on the exact same photo.</p>
-      </div>
-
-      <div class="grid-2">
-        <!-- Policy Editor -->
-        <div class="card">
-          <div class="card-title">
-            <span>Active Policy Configuration</span>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="saveActivePolicy()">💾 Save Rule Changes</button>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="policyEditorSelect">Select Policy Template:</label>
-            <select id="policyEditorSelect" class="form-select" onchange="loadPolicyIntoEditor()"></select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Max Packaging Damage Ratio (Threshold):</label>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <input type="range" id="rulePackagingRatio" min="5" max="60" step="1" value="30" style="flex: 1;" oninput="updateRatioSliderVal(this.value)">
-              <span id="rulePackagingRatioVal" style="font-weight: 700; width: 45px;">30%</span>
-            </div>
-            <small style="color: #64748b; font-size: 0.75rem;">Damage below this threshold gets packaging replacement; exceeding triggers complete unit replacement.</small>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="ruleHandoffValue">Financial Handoff Safety Cap ($):</label>
-            <input type="number" id="ruleHandoffValue" class="form-input" value="200">
-            <small style="color: #64748b; font-size: 0.75rem;">Claims with order values above this threshold bypass AI and force human escalation.</small>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Minimum AI Confidence Score:</label>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <input type="range" id="ruleMinConfidence" min="50" max="95" step="1" value="70" style="flex: 1;" oninput="updateConfidenceSliderVal(this.value)">
-              <span id="ruleMinConfidenceVal" style="font-weight: 700; width: 45px;">0.70</span>
-            </div>
-          </div>
-
-          <hr style="border: none; border-top: 1px solid #1e293b; margin: 1.25rem 0;">
-
-          <!-- AI Policy Compiler -->
+      <!-- SECTION 3: DECISION ENGINE (POLICY ABSTRACTION & 4 STAGES) -->
+      <section id="customerSection3" class="customer-section-panel" style="display: none;">
+        <div class="case-sub-header">
           <div>
-            <label class="form-label">AI Policy Compiler (Muse Spark):</label>
-            <textarea id="rawPolicyProse" class="form-textarea" placeholder="Paste freeform business policy prose here to compile it into executable rules and SAM prompts..."></textarea>
-            <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;" onclick="compilePolicyProse()">
-              ✨ Compile Prose with Muse Spark
-            </button>
+            <span class="eyebrow">STAGE 3 EVALUATION</span>
+            <h2>Autonomous Decision Engine</h2>
+          </div>
+          <div class="case-meta-right">
+            <span id="decisionStatusBanner" class="status-pill status-ready">Processing Stages</span>
           </div>
         </div>
 
-        <!-- Interactive Policy Flip Demonstration -->
-        <div class="card">
-          <div class="card-title">
-            <span>Live "Policy Flip" Demonstration</span>
-            <span class="brand-badge badge-mock">Zero Code Change</span>
-          </div>
+        <!-- 6.1 Customer-Facing Policy Abstraction -->
+        <div class="policy-abstraction-banner" id="policyAbstractionBanner">
+          <h3 id="policyAbstractionHeading">Important points from Apex Logistics's policy</h3>
+          <ul id="policyAbstractionPoints" class="abstraction-points-list">
+            <li>Loading applicable policy terms...</li>
+          </ul>
+        </div>
 
-          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem;">
-            A key hackathon proof moment: Re-run the <strong>exact same visual evidence</strong> under modified policy thresholds to prove the decision flips deterministically.
-          </p>
+        <div class="grid-2">
+          <!-- The 4 Required Processing Stages -->
+          <div class="card">
+            <div class="card-title">
+              <span>Required Processing Pipeline</span>
+              <span style="font-size: 0.75rem; color: #94a3b8;">Deterministic Execution Order</span>
+            </div>
 
-          <div class="form-group">
-            <label class="form-label">1. Choose a case to flip:</label>
-            <select id="flipCaseSelect" class="form-select" onchange="previewFlipCase()"></select>
-          </div>
+            <div class="four-stages-container">
+              <!-- Stage 1 -->
+              <div class="stage-card" id="pstage1">
+                <div class="stage-num">01</div>
+                <div class="stage-details">
+                  <h4>Media Hash &amp; Fraud Audit (crypto.sha256)</h4>
+                  <p id="pstage1Detail">Computing cryptographic SHA-256 digest on original sources...</p>
+                </div>
+                <span class="stage-status-icon">⏳</span>
+              </div>
 
-          <div class="form-group">
-            <label class="form-label">2. Adjust Policy Threshold to Flip Decision:</label>
-            <div style="display: flex; gap: 0.5rem;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setFlipPreset(15)">Set Strict (15% Threshold)</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setFlipPreset(35)">Set Lenient (35% Threshold)</button>
+              <!-- Stage 2 -->
+              <div class="stage-card" id="pstage2">
+                <div class="stage-num">02</div>
+                <div class="stage-details">
+                  <h4>Mask Geometry Quantification</h4>
+                  <p id="pstage2Detail">Deriving estimated visible-area damage ratio from Damage Report...</p>
+                </div>
+                <span class="stage-status-icon">⏳</span>
+              </div>
+
+              <!-- Stage 3 -->
+              <div class="stage-card" id="pstage3">
+                <div class="stage-num">03</div>
+                <div class="stage-details">
+                  <h4>Policy Rule Binding</h4>
+                  <p id="pstage3Detail">Binding damage metrics against merchant's published rules...</p>
+                </div>
+                <span class="stage-status-icon">⏳</span>
+              </div>
+
+              <!-- Stage 4 -->
+              <div class="stage-card" id="pstage4">
+                <div class="stage-num">04</div>
+                <div class="stage-details">
+                  <h4>Muse Spark Multimodal Deliberation (muse-spark-1.3)</h4>
+                  <p id="pstage4Detail">Evaluating claim inputs, visual measurements, and customer message under strict JSON schema.</p>
+                </div>
+                <span class="stage-status-icon">⏳</span>
+              </div>
             </div>
           </div>
 
-          <button type="button" class="btn btn-block" style="background: #6366f1;" onclick="executePolicyFlip()">
-            🔄 Re-Evaluate Same Photo Under New Threshold
-          </button>
-
-          <!-- Flip Comparison Output -->
-          <div id="flipComparisonBox" class="flip-comparison" style="display: none;">
-            <div class="flip-box">
-              <div class="flip-box-title">Before (Original Policy)</div>
-              <div id="flipOriginalDecision" style="font-weight: 700; font-size: 1rem; color: #f87171;">REPLACE_ITEM</div>
-              <div id="flipOriginalReason" style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.25rem;">Exceeded 15% strict threshold</div>
+          <!-- Decision Result Card -->
+          <div class="card decision-result-card">
+            <div class="card-title">
+              <span>Final Claim Determination</span>
+              <span id="decisionBadgeTag" class="status-pill status-ready">PENDING</span>
             </div>
-            <div class="flip-box">
-              <div class="flip-box-title">After (Modified Policy)</div>
-              <div id="flipNewDecision" style="font-weight: 700; font-size: 1rem; color: #34d399;">REPLACE_PACKAGING</div>
-              <div id="flipNewReason" style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.25rem;">Within 35% lenient threshold</div>
+
+            <!-- Prominent Model Decision Formulated Status -->
+            <div id="modelDecisionFormulatedBanner" class="decision-formulated-banner" style="display: none;">
+              <span class="formulated-star">✦</span>
+              <h3>Model Decision Formulated</h3>
+            </div>
+
+            <div id="decisionOutcomeBlock" class="outcome-content-box" style="display: none;">
+              <div id="outcomeTypeBadge" class="outcome-type-pill">AI RECOMMENDATION</div>
+              <h2 id="outcomeTitle">Packaging Replacement Approved</h2>
+              <div class="cited-clause-box">
+                <span class="clause-label">Governing Policy Clause:</span>
+                <p id="outcomeClauseText">Clause 4.2: Outer packaging damage <= 30%</p>
+              </div>
+
+              <div class="customer-reply-box">
+                <span class="reply-label">Explanation &amp; Next Steps:</span>
+                <p id="outcomeReplyText">We inspected your parcel...</p>
+              </div>
+
+              <div class="decision-reasons-box">
+                <span class="reasons-label">Deliberation Rationale:</span>
+                <ul id="outcomeReasonsList"></ul>
+              </div>
+            </div>
+
+            <div id="decisionPendingPlaceholder" class="empty-state-box">
+              <div class="spinner-circle"></div>
+              <p>Executing 4-stage policy evaluation...</p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ==================== TAB 4: OPERATIONS & ACCURACY ==================== -->
-    <section id="tab-operations" class="tab-pane">
-      <div class="page-header">
-        <h1>Operations, API Meter &amp; Verification</h1>
-        <p>Transparent cost tracking, live call budget meter, and automated accuracy benchmarks against human rulings.</p>
-      </div>
-
-      <div class="grid-2">
-        <!-- Live API Usage & Budget Meter -->
-        <div class="card">
-          <div class="card-title">
-            <span>API Usage &amp; Cost Meter</span>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="refreshUsageStats()">🔄 Refresh</button>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.75rem; color: #94a3b8;">Total API Calls</div>
-              <div id="meterTotalCalls" style="font-size: 1.4rem; font-weight: 700;">0</div>
-            </div>
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.75rem; color: #94a3b8;">Estimated Cost (USD)</div>
-              <div id="meterEstimatedCost" style="font-size: 1.4rem; font-weight: 700; color: #34d399;">$0.0000</div>
-            </div>
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.75rem; color: #94a3b8;">Input / Output Tokens</div>
-              <div id="meterTokenCount" style="font-size: 1.1rem; font-weight: 700;">0 / 0</div>
-            </div>
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.75rem; color: #94a3b8;">Budget Hard Cap Remaining</div>
-              <div id="meterHardCap" style="font-size: 1.1rem; font-weight: 700; color: #60a5fa;">100 calls</div>
-            </div>
-          </div>
-
-          <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
-            <p><strong>API Safety Cap:</strong> The server enforces <code>MAX_CALLS=100</code> to prevent accidental credit depletion. All image requests are cached by SHA-256 + concept to eliminate redundant calls.</p>
-          </div>
-        </div>
-
-        <!-- Benchmark Accuracy Suite -->
-        <div class="card">
-          <div class="card-title">
-            <span>Accuracy Benchmark (Honest Evaluation)</span>
-            <button type="button" class="btn btn-primary btn-sm" id="runEvalBtn" onclick="triggerBenchmarkRun()">▶ Run Benchmark</button>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.6rem; text-align: center;">
-              <div style="font-size: 0.7rem; color: #94a3b8;">Human Agreement</div>
-              <div id="benchAgreement" style="font-size: 1.25rem; font-weight: 700; color: #34d399;">90.0%</div>
-            </div>
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.6rem; text-align: center;">
-              <div style="font-size: 0.7rem; color: #94a3b8;">Handoff Rate</div>
-              <div id="benchHandoff" style="font-size: 1.25rem; font-weight: 700; color: #f59e0b;">40.0%</div>
-            </div>
-            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 0.6rem; text-align: center;">
-              <div style="font-size: 0.7rem; color: #94a3b8;">Wrong-Approval</div>
-              <div id="benchWrongApproval" style="font-size: 1.25rem; font-weight: 700; color: #22c55e;">0.0%</div>
-            </div>
-          </div>
-
-          <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
-            <p><strong>Safety-First Metric:</strong> Wrong-Approval Rate must strictly remain <strong>0.0%</strong>. If evidence is ambiguous, the agent will never risk an unverified payout—it always escalates to a human adjuster.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Case History Table -->
-      <div class="card" style="margin-top: 1.5rem;">
-        <div class="card-title">
-          <span>Processed Claims History</span>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="loadCaseTable()">🔄 Refresh Table</button>
-        </div>
-        <div class="table-container">
-          <table class="table" id="claimsTable">
-            <thead>
-              <tr>
-                <th>Case ID</th>
-                <th>Policy</th>
-                <th>Order Value</th>
-                <th>Damage Ratio</th>
-                <th>Status</th>
-                <th>Final Ruling</th>
-                <th>Guardrail Flags</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="claimsTableBody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Global Footer & Compliance Notices -->
-  <footer>
-    <p>SnapDesk — Autonomous Visual Customer Support Agent | Built for Meta Global AI Developer Hackathon 2026</p>
-    <div class="notice-box">
-      <strong>Compliance &amp; Tooling Disclosures:</strong>
-      <ul>
-        <li><strong>Meta Models Used:</strong> Segment Anything Model (SAM 3.1) for visual damage measurement, Muse Spark 1.3 (Standard Mode, non-contributor) for decision reasoning, Muse Voice Transcribe for audio complaints.</li>
-        <li><strong>Geographic Use Policy:</strong> In compliance with Meta's terms, Muse Image is not used. Visual evidence overlays are rendered in code from SAM vector masks. Not available in restricted territories.</li>
-        <li><strong>Open Source Cookbooks:</strong> Derived from and credited to the MIT-licensed <code>meta-model-cookbook</code> (07_sam, 01_api_fundamentals, 06_muse_voice).</li>
-      </ul>
     </div>
-  </footer>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 3: BUSINESS ENTERPRISE DASHBOARD                                     -->
+  <!-- ========================================================================= -->
+  <div id="businessAppView" class="app-view" style="display: none;">
+    <!-- Business Header -->
+    <header class="app-header business-header">
+      <div class="header-inner">
+        <div class="brand-lockup">
+          <img src="assets/logo.png" alt="SnapDesk Logo" class="brand-logo-img sm">
+          <span class="brand-wordmark">SnapDesk</span>
+          <span class="header-portal-tag business-tag">Business Portal</span>
+        </div>
+        
+        <div class="tenant-active-pill">
+          <span class="tenant-dot"></span>
+          <span id="bizHeaderName">Apex Logistics &amp; Retail</span>
+        </div>
+
+        <div class="header-user-menu">
+          <span id="bizUserName" class="user-greeting">Elena Rostova</span>
+          <button type="button" class="btn btn-sm btn-outline" onclick="logoutSession()">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="business-dashboard-container">
+      <!-- Business Sidebar Tabs -->
+      <aside class="business-sidebar">
+        <nav class="sidebar-nav">
+          <button class="nav-item active" onclick="switchBizTab('overview')">
+            <span class="icon">📊</span>
+            <span>Overview &amp; Inbox</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('analytics')">
+            <span class="icon">📈</span>
+            <span>Damage &amp; Returns</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('policies')">
+            <span class="icon">📜</span>
+            <span>Company Policies</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('thresholds')">
+            <span class="icon">⚙️</span>
+            <span>Decision Thresholds</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('human-review')">
+            <span class="icon">🛡️</span>
+            <span>Human-Review Queue</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('products')">
+            <span class="icon">🏷️</span>
+            <span>Product Catalogue</span>
+          </button>
+          <button class="nav-item" onclick="switchBizTab('ops-accuracy')">
+            <span class="icon">🔬</span>
+            <span>Ops &amp; Accuracy</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Business Tab Content Area -->
+      <main class="business-main-content">
+
+        <!-- TAB 1: OVERVIEW & INBOX -->
+        <div id="bizTab-overview" class="biz-tab-pane active">
+          <div class="biz-tab-header">
+            <h2>Operations Overview</h2>
+            <p>Tenant-scoped metrics and live complaints intake for your business.</p>
+          </div>
+
+          <!-- 7.1 Overview Cards -->
+          <div class="overview-metric-grid">
+            <div class="metric-card">
+              <span class="label">OPEN TICKETS</span>
+              <strong id="bizMetricOpen" class="val">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">PENDING</span>
+              <strong id="bizMetricPending" class="val">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">AWAITING HUMAN</span>
+              <strong id="bizMetricHuman" class="val text-danger">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">HANDLED BY AI</span>
+              <strong id="bizMetricAI" class="val text-success">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">REFUNDS APPROVED</span>
+              <strong id="bizMetricRefunds" class="val">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">REPLACEMENTS</span>
+              <strong id="bizMetricReplacements" class="val">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">REPAIRS APPROVED</span>
+              <strong id="bizMetricRepairs" class="val">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">REJECTED CLAIMS</span>
+              <strong id="bizMetricRejected" class="val">0</strong>
+            </div>
+          </div>
+
+          <!-- 7.2 Inbox: All Complaints -->
+          <div class="card mt-4">
+            <div class="card-title">
+              <span>Tenant Complaints Inbox</span>
+              <div class="table-filters">
+                <input type="text" id="inboxSearchInput" class="form-input sm" placeholder="Search case #, customer, product..." oninput="filterInbox()">
+                <select id="inboxStatusFilter" class="form-select sm" onchange="filterInbox()">
+                  <option value="">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="closed">Closed</option>
+                </select>
+                <select id="inboxHandlingFilter" class="form-select sm" onchange="filterInbox()">
+                  <option value="">All Handling</option>
+                  <option value="ai_handled">AI Handled</option>
+                  <option value="human_intervention_required">Human Intervention</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case #</th>
+                    <th>Customer</th>
+                    <th>Product / Order</th>
+                    <th>Date Received</th>
+                    <th>Outcome</th>
+                    <th>Handling Badge</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="bizInboxTbody">
+                  <tr><td colspan="7" class="text-center">Loading tenant complaints...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PRODUCT RETURN & DAMAGE ANALYTICS + RESOLUTION DISTRIBUTION -->
+        <div id="bizTab-analytics" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Product Damage &amp; Return Analytics</h2>
+            <p>Empirical breakdown of returns, damage complaint rates, and outcome distribution.</p>
+          </div>
+
+          <div class="grid-2">
+            <!-- 7.3 Ranked Products -->
+            <div class="card">
+              <div class="card-title">
+                <span>Products Ranked by Damage Complaints</span>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table sm">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>SKU</th>
+                      <th>Category</th>
+                      <th>Complaints</th>
+                      <th>Returns</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bizProductRankingsTbody">
+                    <tr><td colspan="5">Loading product rankings...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 7.4 Resolution Analytics Pie / Donut Chart -->
+            <div class="card">
+              <div class="card-title">
+                <span>Resolution Outcome Distribution</span>
+              </div>
+              <div class="donut-chart-container">
+                <svg id="resolutionDonutSvg" viewBox="0 0 160 160" class="donut-chart-svg"></svg>
+                <div class="donut-center-text">
+                  <span id="donutTotalCount">0</span>
+                  <small>Cases</small>
+                </div>
+              </div>
+              <div id="donutLegendContainer" class="donut-legend-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: COMPANY POLICIES (MAJOR AREA WITH INITIALLY BLANK TEXT EDITOR) -->
+        <div id="bizTab-policies" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Company Policies</h2>
+            <p><strong>The Policy is the Only Configuration.</strong> Enter rules in your own words. SnapDesk evaluates only your tenant's cases against this text.</p>
+          </div>
+
+          <div class="grid-2">
+            <!-- 7.5 Policy Blank Text Editor -->
+            <div class="card">
+              <div class="card-title">
+                <span>Policy Text Editor</span>
+                <span id="activePolicyVersionBadge" class="brand-badge badge-mock">Version 1.0</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="policyEditorTitle">Policy Document Title</label>
+                <input type="text" id="policyEditorTitle" class="form-input" placeholder="e.g. Apex Express Transit Guarantee v2.0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="policyEditorText">Policy Terms &amp; Clauses (In your own words)</label>
+                <textarea id="policyEditorText" class="form-textarea code-font" rows="12" placeholder="Write your business rules here:
+1. Reporting window for claims...
+2. Conditions for full refund when contents are damaged...
+3. Thresholds for packaging replacement vs complete item replacement...
+4. High-value order limits requiring human specialist sign-off..."></textarea>
+              </div>
+
+              <div class="editor-actions-row">
+                <button type="button" class="btn btn-secondary" onclick="savePolicyDraft()">Save Draft</button>
+                <button type="button" class="btn btn-primary" onclick="publishPolicyVersion()">Publish Active Policy</button>
+              </div>
+            </div>
+
+            <!-- Policy Versions & Customer Abstraction Preview -->
+            <div class="card">
+              <div class="card-title">
+                <span>Version History &amp; Abstraction Preview</span>
+              </div>
+
+              <h4 style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.5rem;">How Customers See Your Active Policy:</h4>
+              <div class="policy-abstraction-preview" id="policyPreviewBox">
+                <p>Loading active customer abstraction...</p>
+              </div>
+
+              <h4 style="font-size: 0.85rem; color: #cbd5e1; margin: 1rem 0 0.5rem;">Published Version History:</h4>
+              <ul class="version-history-list" id="policyVersionHistoryList">
+                <li>Loading versions...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: DECISION THRESHOLDS CONFIGURATION -->
+        <div id="bizTab-thresholds" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Decision Thresholds Configuration</h2>
+            <p>Set numerical boundaries that govern automated actions. Thresholds are isolated to your business.</p>
+          </div>
+
+          <div class="card" style="max-width: 720px;">
+            <div class="form-group">
+              <label class="form-label">Max Packaging Damage Ratio (%):</label>
+              <div class="slider-row">
+                <input type="range" id="threshPackagingRatio" min="5" max="60" value="30" oninput="updateThreshLabel(this.value)">
+                <span id="threshPackagingRatioVal" class="slider-val">30%</span>
+              </div>
+              <span class="field-hint">Damage up to this ratio receives packaging replacement; above triggers unit replacement.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="threshHandoffValue">Financial Handoff Safety Cap ($ USD):</label>
+              <input type="number" id="threshHandoffValue" class="form-input" value="200.00">
+              <span class="field-hint">Claims exceeding this amount bypass automated approval and mandate human specialist sign-off.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Minimum AI Confidence Score (0.50 - 0.95):</label>
+              <div class="slider-row">
+                <input type="range" id="threshMinConfidence" min="50" max="95" value="70" oninput="updateConfLabel(this.value)">
+                <span id="threshMinConfidenceVal" class="slider-val">0.70</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Automated Actions Authorization:</label>
+              <div class="checkbox-row">
+                <label><input type="checkbox" id="threshAutoRefund" checked> Allow Automated Refunds under policy</label>
+                <label><input type="checkbox" id="threshAutoReplacement" checked> Allow Automated Replacements under policy</label>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="saveThresholdSettings()">Update Decision Thresholds</button>
+          </div>
+        </div>
+
+        <!-- TAB 5: HUMAN-REVIEW QUEUE -->
+        <div id="bizTab-human-review" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Human-Review Queue</h2>
+            <p>Claims escalated by deterministic safety guardrails (high value, ambiguous photos, low confidence).</p>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case #</th>
+                    <th>Customer</th>
+                    <th>Order Value</th>
+                    <th>Damage Ratio</th>
+                    <th>Escalation Reason</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bizHumanReviewTbody">
+                  <tr><td colspan="6">No cases awaiting human review.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: PRODUCT CATALOGUE -->
+        <div id="bizTab-products" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Product Catalogue</h2>
+            <p>Maintain your active product SKUs and return eligibility windows.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span>Add New Product SKU</span></div>
+              <form onsubmit="handleProductAdd(event)">
+                <div class="form-group">
+                  <label class="form-label">Product Name *</label>
+                  <input type="text" id="newProdName" class="form-input" required placeholder="e.g. Nordic Microwave Pro">
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">SKU</label>
+                    <input type="text" id="newProdSku" class="form-input" placeholder="e.g. NDK-MW-01">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Price ($ USD) *</label>
+                    <input type="number" id="newProdPrice" class="form-input" required step="0.01" placeholder="180.00">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <input type="text" id="newProdCategory" class="form-input" placeholder="e.g. Kitchen Appliances">
+                </div>
+                <button type="submit" class="btn btn-primary">Save to Catalogue</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><span>Active SKUs</span></div>
+              <div class="table-responsive">
+                <table class="data-table sm">
+                  <thead>
+                    <tr><th>Name</th><th>SKU</th><th>Price</th><th>Category</th></tr>
+                  </thead>
+                  <tbody id="bizProductsCatalogueTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 7: OPS & ACCURACY (PRESERVED & RELOCATED STRICTLY TO BUSINESS UI) -->
+        <div id="bizTab-ops-accuracy" class="biz-tab-pane" style="display: none;">
+          <div class="biz-tab-header">
+            <h2>Operations &amp; Model Accuracy</h2>
+            <p>Preserved operational telemetry, API budget meter, benchmark test suite, and geometric definitions.</p>
+          </div>
+
+          <div class="grid-2">
+            <!-- API Usage & Cost Meter -->
+            <div class="card">
+              <div class="card-title">
+                <span>API Meter &amp; Spend Guard</span>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="loadBizOpsAccuracy()">Refresh</button>
+              </div>
+
+              <div class="overview-metric-grid sm-grid">
+                <div class="metric-card">
+                  <span class="label">TOTAL CALLS</span>
+                  <strong id="opsTotalCalls" class="val">0</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">EST. COST (USD)</span>
+                  <strong id="opsEstCost" class="val text-success">$0.0000</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">TOKENS (IN / OUT)</span>
+                  <strong id="opsTokens" class="val">0 / 0</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">HARD CAP REMAINING</span>
+                  <strong id="opsHardCap" class="val text-info">100 calls</strong>
+                </div>
+              </div>
+
+              <div class="mt-4" style="font-size: 0.8rem; color: #94a3b8; line-height: 1.45;">
+                <p><strong>Damage Ratio Definition:</strong> Estimated visible-area ratio is computed via deterministic code: <code>Damage Area Pixels / Product Boundary Pixels * 100</code> using vector geometry decoded by <code>@meta-sam/parser</code>.</p>
+              </div>
+            </div>
+
+            <!-- Benchmark Evaluation Suite -->
+            <div class="card">
+              <div class="card-title">
+                <span>Benchmark Accuracy Suite</span>
+                <button type="button" id="btnRunOpsEval" class="btn btn-sm btn-primary" onclick="runBizBenchmark()">▶ Run 10-Case Benchmark</button>
+              </div>
+
+              <div class="overview-metric-grid sm-grid">
+                <div class="metric-card">
+                  <span class="label">AGREEMENT RATE</span>
+                  <strong id="opsBenchAgreement" class="val text-success">90.0%</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">HANDOFF RATE</span>
+                  <strong id="opsBenchHandoff" class="val text-warning">40.0%</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">WRONG-APPROVAL</span>
+                  <strong id="opsBenchWrongApp" class="val text-success">0.0%</strong>
+                </div>
+                <div class="metric-card">
+                  <span class="label">SANITY RATE</span>
+                  <strong id="opsBenchSanity" class="val text-info">100.0%</strong>
+                </div>
+              </div>
+
+              <div class="mt-4" style="font-size: 0.8rem; color: #94a3b8; line-height: 1.45;">
+                <p><strong>Safety Target:</strong> Wrong-Approval Rate must remain <strong>0.0%</strong>. Ambiguous photos or unverified damages are routed to human review, ensuring AI never causes unauthorized payouts.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- CASE INVESTIGATION WORKSPACE MODAL (BUSINESS DEEP DIVE)                   -->
+  <!-- ========================================================================= -->
+  <div id="caseInvestigateModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card modal-lg">
+      <button type="button" class="modal-close-btn" onclick="closeInvestigateModal()">✕</button>
+      
+      <div class="modal-header">
+        <div class="modal-badge">INVESTIGATION AUDIT WORKSPACE</div>
+        <h3 id="invCaseNumber">TKT-APX-8801</h3>
+        <p id="invCustomerMeta">Sarah Jenkins | Postal Code 94107</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- Visual & Geometry -->
+        <div>
+          <h4 style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.4rem;">Visual Evidence &amp; Vector Overlay</h4>
+          <div class="viewer-canvas-frame sm">
+            <img id="invDisplayImg" src="assets/box_crushed.svg" alt="Evidence">
+            <div id="invSvgOverlay" class="svg-annotation-overlay"></div>
+          </div>
+          <div class="mt-2" style="font-size: 0.78rem; color: #94a3b8;">
+            Damage Ratio: <strong id="invDamageRatio" class="text-warning">0.0%</strong> | Assessment: <strong id="invAssessment">Damage Identified</strong>
+          </div>
+        </div>
+
+        <!-- Report & Audit -->
+        <div>
+          <h4 style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.4rem;">Canonical Damage Report Findings</h4>
+          <div id="invReportFindings" class="report-findings-list sm-box"></div>
+
+          <h4 style="font-size: 0.85rem; color: #cbd5e1; margin: 0.75rem 0 0.4rem;">Decision &amp; Threshold Comparison</h4>
+          <div id="invDecisionBox" class="sm-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
 </html>
-

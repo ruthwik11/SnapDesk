@@ -1,375 +1,360 @@
 /**
- * SnapDesk Front-End Application Logic
+ * SnapDesk Enterprise Client Application
+ * Cohesive multi-tenant customer support platform powered by Meta SAM 3.1 & Muse Spark 1.3
  */
 
 // Application State
-let activePolicies = [];
-let activeCases = [];
-let currentEvidenceCase = null;
-let simulatedVoiceAttached = false;
-let currentUploadedBase64 = null;
-let currentUploadedMime = 'image/svg+xml';
-let currentUploadedFilename = 'box_crushed.svg';
+let currentSessionToken = localStorage.getItem('snapdesk_token') || null;
+let currentUser = null;
+let currentBusiness = null;
 
-// Layer visibility toggles
+let stagedMediaList = []; // Client-side media staging (no persistence before Submit Ticket!)
+let activeCustomerCase = null;
+let activeDamageReport = null;
+let activeDecisionResult = null;
+
+let authModalRole = 'business'; // 'business' or 'customer'
+let authModalMode = 'login';    // 'login' or 'register'
+
+// Vision Layer Toggles
 let showMaskLayer = true;
 let showBoxLayer = true;
 
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
-  setupTabs();
-  setupDropzone();
-  await checkSystemStatus();
-  await loadPolicies();
-  await loadCaseTable();
-  await refreshUsageStats();
-
-  // Load default preset for instant demo readiness
-  loadPreset('crushed_box');
+  initCurtainReveal();
+  await restoreActiveSession();
+  await loadPublicBusinessProviders();
 });
 
-// --- Tab Navigation ---
-function setupTabs() {
-  const tabs = document.querySelectorAll('.nav-tab');
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach((p) => p.classList.remove('active'));
+// =========================================================================
+// 1. JAPANESE-INSPIRED CURTAIN ROLL-UP REVEAL
+// =========================================================================
+function initCurtainReveal() {
+  const overlay = document.getElementById('curtainOverlay');
+  if (!overlay) return;
 
-      tab.classList.add('active');
-      const targetId = `tab-${tab.dataset.tab}`;
-      const pane = document.getElementById(targetId);
-      if (pane) pane.classList.add('active');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    overlay.style.display = 'none';
+    return;
+  }
 
-      if (tab.dataset.tab === 'operations') {
-        refreshUsageStats();
-        loadCaseTable();
-      } else if (tab.dataset.tab === 'policies') {
-        populateFlipCaseSelect();
-      }
-    });
-  });
+  setTimeout(() => {
+    overlay.classList.add('lifted');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 1300);
+  }, 400);
 }
 
-function switchTab(tabName) {
-  const tabBtn = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
-  if (tabBtn) tabBtn.click();
+function scrollToAccounts() {
+  document.getElementById('accountsSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-// --- System Status ---
-async function checkSystemStatus() {
+function returnToLanding() {
+  document.getElementById('customerAppView').style.display = 'none';
+  document.getElementById('businessAppView').style.display = 'none';
+  document.getElementById('landingPageView').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =========================================================================
+// 2. AUTHENTICATION & MULTI-TENANT SESSION MANAGEMENT
+// =========================================================================
+async function restoreActiveSession() {
+  if (!currentSessionToken) return;
+
   try {
-    const res = await fetch('/api/system');
+    const res = await fetch('/api/auth/session', {
+      headers: { Authorization: `Bearer ${currentSessionToken}` },
+    });
     const data = await res.json();
-    const badge = document.getElementById('modeBadge');
-    if (data.mode === 'real') {
-      badge.textContent = 'Real Mode (Meta API)';
-      badge.className = 'brand-badge badge-real';
+    if (data.success && data.session) {
+      currentUser = data.session;
+      currentBusiness = data.business;
+      routeUserToPortal();
     } else {
-      badge.textContent = 'Mock Mode (Offline)';
-      badge.className = 'brand-badge badge-mock';
+      localStorage.removeItem('snapdesk_token');
+      currentSessionToken = null;
     }
   } catch (err) {
-    console.warn('Could not check system status:', err);
+    console.warn('Could not restore session:', err);
   }
 }
 
-// --- Policies ---
-async function loadPolicies() {
-  try {
-    const res = await fetch('/api/policies');
-    const data = await res.json();
-    activePolicies = data.policies || [];
+function routeUserToPortal() {
+  const landing = document.getElementById('landingPageView');
+  const custApp = document.getElementById('customerAppView');
+  const bizApp = document.getElementById('businessAppView');
 
-    const intakeSelect = document.getElementById('policySelect');
-    const editorSelect = document.getElementById('policyEditorSelect');
+  landing.style.display = 'none';
 
-    intakeSelect.innerHTML = '';
-    editorSelect.innerHTML = '';
-
-    activePolicies.forEach((p) => {
-      const opt1 = new Option(`${p.name} (${p.category || 'Retail'})`, p.id);
-      const opt2 = new Option(`${p.name} (${p.category || 'Retail'})`, p.id);
-      intakeSelect.appendChild(opt1);
-      editorSelect.appendChild(opt2);
-    });
-
-    loadPolicyIntoEditor();
-  } catch (err) {
-    console.error('Failed to load policies:', err);
-  }
-}
-
-function loadPolicyIntoEditor() {
-  const id = document.getElementById('policyEditorSelect').value;
-  const policy = activePolicies.find((p) => p.id === id);
-  if (!policy) return;
-
-  const ratio = Math.round((policy.rules.packaging_replace_max_ratio || 0.3) * 100);
-  document.getElementById('rulePackagingRatio').value = ratio;
-  document.getElementById('rulePackagingRatioVal').textContent = `${ratio}%`;
-
-  document.getElementById('ruleHandoffValue').value = policy.rules.handoff_order_value || 200;
-
-  const conf = Math.round((policy.rules.min_confidence || 0.7) * 100);
-  document.getElementById('ruleMinConfidence').value = conf;
-  document.getElementById('ruleMinConfidenceVal').textContent = (conf / 100).toFixed(2);
-}
-
-function updateRatioSliderVal(val) {
-  document.getElementById('rulePackagingRatioVal').textContent = `${val}%`;
-}
-
-function updateConfidenceSliderVal(val) {
-  document.getElementById('ruleMinConfidenceVal').textContent = (val / 100).toFixed(2);
-}
-
-async function saveActivePolicy() {
-  const id = document.getElementById('policyEditorSelect').value;
-  const policy = activePolicies.find((p) => p.id === id);
-  if (!policy) return;
-
-  const updatedRules = {
-    ...policy.rules,
-    packaging_replace_max_ratio: parseFloat(document.getElementById('rulePackagingRatio').value) / 100,
-    handoff_order_value: parseFloat(document.getElementById('ruleHandoffValue').value),
-    min_confidence: parseFloat(document.getElementById('ruleMinConfidence').value) / 100,
-  };
-
-  try {
-    const res = await fetch(`/api/policies/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...policy, rules: updatedRules }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert(`Policy rules for "${policy.name}" updated successfully!`);
-      await loadPolicies();
-    }
-  } catch (err) {
-    alert(`Failed to save policy: ${err.message}`);
-  }
-}
-
-async function compilePolicyProse() {
-  const text = document.getElementById('rawPolicyProse').value;
-  if (!text.trim()) {
-    alert('Please paste business policy prose to compile.');
-    return;
-  }
-
-  const btn = event.target;
-  const originalText = btn.textContent;
-  btn.textContent = '⏳ Compiling with Muse Spark...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/policies/compile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, name: 'AI Compiled Policy' }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert(`Policy compiled successfully!\nExtracted threshold: ${(data.policy.rules.packaging_replace_max_ratio * 100).toFixed(0)}%\nHandoff value: $${data.policy.rules.handoff_order_value}`);
-      await loadPolicies();
-    }
-  } catch (err) {
-    alert(`Compiler error: ${err.message}`);
-  } finally {
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
-}
-
-// --- Presets ---
-async function loadPreset(presetKey) {
-  const imgEl = document.getElementById('previewImage');
-  const previewContainer = document.getElementById('previewContainer');
-  const dropzoneText = document.getElementById('dropzoneText');
-
-  let assetUrl = 'assets/box_crushed.svg';
-  let message = '';
-  let orderValue = 45.0;
-  let policyId = 'parcel-damage';
-  let filename = 'crushed_box.svg';
-
-  switch (presetKey) {
-    case 'crushed_box':
-      assetUrl = 'assets/box_crushed.svg';
-      message = 'Shipping box arrived with crushed upper right corner. Item inside is intact.';
-      orderValue = 45.0;
-      policyId = 'parcel-damage';
-      filename = 'parcel_crushed_corner.svg';
-      break;
-    case 'broken_vase':
-      assetUrl = 'assets/box_broken.svg';
-      message = 'The box arrived crushed and open. The fragile porcelain vase inside is shattered in pieces!';
-      orderValue = 85.0;
-      policyId = 'parcel-damage';
-      filename = 'broken_porcelain_box.svg';
-      break;
-    case 'scratched_appliance':
-      assetUrl = 'assets/appliance_scratch.svg';
-      message = 'Unboxed brand new microwave and found a visible 2-inch scratch along the glass door.';
-      orderValue = 60.0;
-      policyId = 'appliance-triage';
-      filename = 'microwave_scratch.svg';
-      break;
-    case 'high_val_laptop':
-      assetUrl = 'assets/box_crushed.svg';
-      message = 'Delivery driver dropped the parcel for my MacBook Pro. Packaging has corner dent.';
-      orderValue = 1450.0;
-      policyId = 'parcel-damage';
-      filename = 'laptop_box_dent.svg';
-      break;
-    case 'blurry_frame':
-      assetUrl = 'assets/blurry_photo.svg';
-      message = 'My item was damaged in shipping.';
-      orderValue = 35.0;
-      policyId = 'parcel-damage';
-      filename = 'blurry_unfocused_shot.svg';
-      break;
-  }
-
-  document.getElementById('policySelect').value = policyId;
-  document.getElementById('claimMessage').value = message;
-  document.getElementById('orderValue').value = orderValue.toFixed(2);
-
-  // Fetch preset svg to convert to data URL
-  try {
-    const res = await fetch(assetUrl);
-    const text = await res.text();
-    currentUploadedBase64 = `data:image/svg+xml;base64,${btoa(text)}`;
-    currentUploadedMime = 'image/svg+xml';
-    currentUploadedFilename = filename;
-
-    imgEl.src = currentUploadedBase64;
-    previewContainer.style.display = 'block';
-    dropzoneText.style.display = 'none';
-  } catch (err) {
-    console.error('Error loading preset image:', err);
-  }
-}
-
-// --- Dropzone & File Input ---
-function setupDropzone() {
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('mediaInput');
-  const previewContainer = document.getElementById('previewContainer');
-  const previewImage = document.getElementById('previewImage');
-  const dropzoneText = document.getElementById('dropzoneText');
-
-  dropzone.addEventListener('click', () => fileInput.click());
-
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) handleFile(file);
-  });
-
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
-
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  });
-
-  function handleFile(file) {
-    currentUploadedFilename = file.name;
-    currentUploadedMime = file.type || 'image/jpeg';
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      currentUploadedBase64 = e.target.result;
-      previewImage.src = currentUploadedBase64;
-      previewContainer.style.display = 'block';
-      dropzoneText.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-function toggleVoiceSimulation() {
-  simulatedVoiceAttached = !simulatedVoiceAttached;
-  const statusEl = document.getElementById('voiceStatus');
-  const btn = document.getElementById('recordVoiceBtn');
-
-  if (simulatedVoiceAttached) {
-    statusEl.textContent = '✓ Voice note attached (4.2s audio)';
-    statusEl.style.color = '#34d399';
-    btn.textContent = '❌ Detach Voice Note';
+  if (currentUser.role === 'customer') {
+    custApp.style.display = 'block';
+    bizApp.style.display = 'none';
+    document.getElementById('customerUserName').textContent = `Welcome, ${currentUser.name.split(' ')[0]}`;
+    showCustomerSection(1);
   } else {
-    statusEl.textContent = 'No voice note attached';
-    statusEl.style.color = '#94a3b8';
-    btn.textContent = '🎙️ Simulate Voice Note';
+    // Business Account
+    custApp.style.display = 'none';
+    bizApp.style.display = 'block';
+    document.getElementById('bizUserName').textContent = currentUser.name;
+    document.getElementById('bizHeaderName').textContent = currentBusiness?.name || 'Enterprise Tenant';
+    loadBizDashboard();
   }
 }
 
-// --- Claim Submission & Agent Animation ---
-document.getElementById('claimForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+function openAuthModal(role, mode) {
+  authModalRole = role;
+  authModalMode = mode;
 
-  if (!currentUploadedBase64) {
-    alert('Please upload or select an evidence image first.');
-    return;
+  const modal = document.getElementById('authModal');
+  const badge = document.getElementById('authModalBadge');
+  const title = document.getElementById('authModalTitle');
+  const subtitle = document.getElementById('authModalSubtitle');
+  const bizExtra = document.getElementById('businessExtraFields');
+  const nameGroup = document.getElementById('nameFieldGroup');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const toggleText = document.getElementById('authToggleText');
+  const toggleBtn = document.getElementById('authToggleBtn');
+  const errorBanner = document.getElementById('authErrorMsg');
+
+  errorBanner.style.display = 'none';
+
+  if (role === 'business') {
+    badge.textContent = 'BUSINESS ACCOUNT';
+    badge.style.color = 'var(--copper)';
+  } else {
+    badge.textContent = 'CUSTOMER ACCOUNT';
+    badge.style.color = 'var(--accent-green)';
   }
 
-  const submitBtn = document.getElementById('submitClaimBtn');
-  const progressBox = document.getElementById('pipelineProgress');
-  const emptyPlaceholder = document.getElementById('emptyResultPlaceholder');
-  const resultContent = document.getElementById('activeResultContent');
+  if (mode === 'login') {
+    title.textContent = `Sign in as ${role === 'business' ? 'Business' : 'Customer'}`;
+    subtitle.textContent = `Enter your credentials to access the ${role === 'business' ? 'Business Dashboard' : 'Customer Portal'}.`;
+    bizExtra.style.display = 'none';
+    nameGroup.style.display = 'none';
+    submitBtn.textContent = 'Sign In';
+    toggleText.textContent = 'Need an account?';
+    toggleBtn.textContent = 'Register here';
+  } else {
+    title.textContent = `Create ${role === 'business' ? 'Business' : 'Customer'} Account`;
+    subtitle.textContent = `Register your new ${role === 'business' ? 'merchant tenant' : 'customer account'}.`;
+    bizExtra.style.display = role === 'business' ? 'block' : 'none';
+    nameGroup.style.display = 'block';
+    submitBtn.textContent = 'Create Account';
+    toggleText.textContent = 'Already have an account?';
+    toggleBtn.textContent = 'Sign in here';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').style.display = 'none';
+}
+
+function toggleAuthMode() {
+  const newMode = authModalMode === 'login' ? 'register' : 'login';
+  openAuthModal(authModalRole, newMode);
+}
+
+function quickFillAuth(email, pass, role, mode) {
+  document.getElementById('authEmail').value = email;
+  document.getElementById('authPassword').value = pass;
+  openAuthModal(role, mode);
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errorBanner = document.getElementById('authErrorMsg');
+  const submitBtn = document.getElementById('authSubmitBtn');
 
   submitBtn.disabled = true;
-  progressBox.style.display = 'block';
-  emptyPlaceholder.style.display = 'none';
-  resultContent.style.display = 'none';
-
-  // Step Animation
-  const stepIds = ['step-intake', 'step-sam', 'step-spark', 'step-guardrails', 'step-evidence'];
-  stepIds.forEach((id) => {
-    const el = document.getElementById(id);
-    el.className = 'progress-step-item';
-  });
-
-  const activateStep = (idx) => {
-    stepIds.forEach((id, i) => {
-      const el = document.getElementById(id);
-      if (i < idx) el.className = 'progress-step-item done';
-      else if (i === idx) el.className = 'progress-step-item active';
-      else el.className = 'progress-step-item';
-    });
-  };
-
-  activateStep(0);
-  await sleep(250);
-  activateStep(1);
-  await sleep(350);
-
-  const payload = {
-    policyId: document.getElementById('policySelect').value,
-    message: document.getElementById('claimMessage').value,
-    orderValue: document.getElementById('orderValue').value,
-    mediaBase64: currentUploadedBase64,
-    hint: currentUploadedFilename,
-  };
-
-  // If voice simulation enabled, pass audio trigger
-  if (simulatedVoiceAttached) {
-    payload.hint += ' with_voice_note';
-  }
+  errorBanner.style.display = 'none';
 
   try {
-    activateStep(2);
-    await sleep(250);
-    activateStep(3);
+    let endpoint = authModalMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+    let payload = { email, password, expectedRole: authModalRole };
+
+    if (authModalMode === 'register') {
+      payload.name = document.getElementById('authName').value.trim() || email.split('@')[0];
+      payload.role = authModalRole;
+      if (authModalRole === 'business') {
+        payload.businessName = document.getElementById('regBusinessName').value.trim();
+        payload.businessCategory = document.getElementById('regBusinessCategory').value;
+      }
+    }
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Authentication failed');
+    }
+
+    currentSessionToken = data.session.token;
+    localStorage.setItem('snapdesk_token', currentSessionToken);
+    currentUser = data.session;
+    currentBusiness = data.session.businessId ? { id: data.session.businessId, name: data.user.name } : null;
+
+    closeAuthModal();
+    routeUserToPortal();
+  } catch (err) {
+    errorBanner.textContent = err.message;
+    errorBanner.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+function logoutSession() {
+  if (currentSessionToken) {
+    fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${currentSessionToken}` },
+    }).catch(() => {});
+  }
+  localStorage.removeItem('snapdesk_token');
+  currentSessionToken = null;
+  currentUser = null;
+  currentBusiness = null;
+  returnToLanding();
+}
+
+// =========================================================================
+// 3. SECTION 1: CUSTOMER INTAKE / RAISE A TICKET
+// =========================================================================
+async function loadPublicBusinessProviders() {
+  try {
+    const res = await fetch('/api/businesses/public');
+    const data = await res.json();
+    const select = document.getElementById('custProviderSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="" disabled selected>-- Select your product Provider --</option>';
+    (data.businesses || []).forEach((b) => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = `${b.name} (${b.category})`;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Failed to load business providers:', err);
+  }
+}
+
+function triggerFileInput() {
+  document.getElementById('ticketMediaInput').click();
+}
+
+function handleStagedMediaSelection(e) {
+  const files = Array.from(e.target.files);
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      stagedMediaList.push({
+        id: `media_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type || 'image/jpeg',
+        base64: event.target.result,
+        isVideo: file.type.startsWith('video/') || file.name.endsWith('.mp4'),
+      });
+      renderStagedMediaPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeStagedMedia(mediaId) {
+  stagedMediaList = stagedMediaList.filter((m) => m.id !== mediaId);
+  renderStagedMediaPreviews();
+}
+
+function renderStagedMediaPreviews() {
+  const container = document.getElementById('stagedMediaContainer');
+  if (!container) return;
+
+  if (stagedMediaList.length === 0) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  container.style.display = 'grid';
+  container.innerHTML = '';
+
+  stagedMediaList.forEach((media) => {
+    const tile = document.createElement('div');
+    tile.className = 'staged-preview-tile';
+
+    if (media.isVideo) {
+      tile.innerHTML = `
+        <video src="${media.base64}" muted playsinline></video>
+        <button type="button" class="tile-remove-x" onclick="removeStagedMedia('${media.id}')">✕</button>
+        <div class="tile-label">📹 ${media.name}</div>
+      `;
+    } else {
+      tile.innerHTML = `
+        <img src="${media.base64}" alt="Preview">
+        <button type="button" class="tile-remove-x" onclick="removeStagedMedia('${media.id}')">✕</button>
+        <div class="tile-label">${media.name}</div>
+      `;
+    }
+    container.appendChild(tile);
+  });
+}
+
+function handleAudioSelection(e) {
+  const file = e.target.files[0];
+  const label = document.getElementById('audioStatusText');
+  if (file) {
+    if (!file.type.startsWith('audio/') && !file.name.match(/\.(wav|mp3|m4a|ogg)$/i)) {
+      alert('The voice note field accepts audio files only.');
+      e.target.value = '';
+      label.textContent = 'Rejected: Audio files only';
+      return;
+    }
+    label.textContent = `✓ Attached audio note: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+    label.style.color = 'var(--accent-green)';
+  } else {
+    label.textContent = 'No voice note selected (Audio files only)';
+    label.style.color = 'var(--text-muted)';
+  }
+}
+
+// SUBMIT TICKET: THE ONLY PERSISTENCE TRIGGER
+async function handleTicketSubmission(e) {
+  e.preventDefault();
+
+  if (stagedMediaList.length === 0) {
+    alert('Please attach at least one photo or video evidence file before submitting.');
+    return;
+  }
+
+  const submitBtn = document.getElementById('btnSubmitTicket');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting Ticket...';
+
+  try {
+    const payload = {
+      customerName: document.getElementById('custFullName').value,
+      customerPhone: document.getElementById('custPhone').value,
+      postalCode: document.getElementById('custPostal').value,
+      businessId: document.getElementById('custProviderSelect').value,
+      productCost: document.getElementById('custProductCost').value || null,
+      writtenComplaint: document.getElementById('custConcernText').value,
+      customerId: currentUser?.id || 'usr_anonymous',
+      stagedMedia: JSON.stringify(stagedMediaList),
+    };
 
     const res = await fetch('/api/cases', {
       method: 'POST',
@@ -377,323 +362,825 @@ document.getElementById('claimForm').addEventListener('submit', async (e) => {
       body: JSON.stringify(payload),
     });
 
-    activateStep(4);
-    await sleep(200);
-
     const data = await res.json();
     if (!data.success) {
-      throw new Error(data.error || 'Server error processing case');
+      throw new Error(data.error || 'Failed to submit ticket');
     }
 
-    stepIds.forEach((id) => (document.getElementById(id).className = 'progress-step-item done'));
-    await sleep(250);
+    alert(`Ticket Submitted Successfully!\nCase Number: ${data.caseNumber}\nAssigned Provider: ${data.businessName}`);
 
-    displayResolution(data.case);
-    currentEvidenceCase = data.case;
-    await loadCaseTable();
-    await refreshUsageStats();
+    // Load created case and advance to Section 2
+    const caseRes = await fetch(`/api/cases/${data.caseId}`);
+    const caseData = await caseRes.json();
+    activeCustomerCase = caseData.case;
+
+    // Enable navigation to Section 2
+    document.getElementById('btnNavSection2').classList.remove('disabled');
+    showCustomerSection(2);
   } catch (err) {
-    alert(`Error processing claim: ${err.message}`);
-    emptyPlaceholder.style.display = 'block';
+    alert(`Submission error: ${err.message}`);
   } finally {
     submitBtn.disabled = false;
-    progressBox.style.display = 'none';
+    submitBtn.textContent = 'Submit Ticket';
   }
-});
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// --- Display Resolution ---
-function displayResolution(caseData) {
-  const resultContent = document.getElementById('activeResultContent');
-  const banner = document.getElementById('decisionBanner');
-  const badge = document.getElementById('decisionBadge');
-  const title = document.getElementById('decisionTitle');
-  const clause = document.getElementById('decisionClause');
-  const reply = document.getElementById('customerReplyText');
-  const caseIdSpan = document.getElementById('resultCaseId');
+function showCustomerSection(sectionNum) {
+  document.getElementById('customerSection1').style.display = sectionNum === 1 ? 'block' : 'none';
+  document.getElementById('customerSection2').style.display = sectionNum === 2 ? 'block' : 'none';
+  document.getElementById('customerSection3').style.display = sectionNum === 3 ? 'block' : 'none';
 
-  resultContent.style.display = 'block';
-  caseIdSpan.textContent = `Case #${caseData.id}`;
+  document.querySelectorAll('.step-nav-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx + 1 === sectionNum);
+  });
 
-  const decision = caseData.finalDecision;
-  banner.className = `decision-banner decision-${decision}`;
-
-  let labelText = decision.replace('_', ' ').toUpperCase();
-  if (caseData.flags && caseData.flags.length > 0) {
-    labelText += ` (OVERRIDDEN: ${caseData.flags.join(', ')})`;
+  if (sectionNum === 2 && activeCustomerCase) {
+    initVisionSection();
+  } else if (sectionNum === 3 && activeCustomerCase) {
+    initDecisionSection();
   }
-
-  badge.textContent = labelText;
-  badge.style.background = decision === 'handoff' ? '#dc2626' : '#2563eb';
-  badge.style.color = '#fff';
-
-  title.textContent = formatDecisionTitle(decision);
-  clause.textContent = `Cited Clause: ${caseData.modelDecision.clause || 'Business Policy Clause'}`;
-  reply.textContent = caseData.modelDecision.reply || 'Your request has been processed.';
 }
 
-function formatDecisionTitle(decision) {
-  switch (decision) {
+// =========================================================================
+// 4. SECTION 2: VISION WORKSPACE & DAMAGE REPORT
+// =========================================================================
+async function initVisionSection() {
+  if (!activeCustomerCase) return;
+
+  document.getElementById('s2CaseTag').textContent = activeCustomerCase.caseNumber;
+  document.getElementById('s2CustomerHeading').textContent = `Damage Inspection Workspace — ${activeCustomerCase.customerName}`;
+  document.getElementById('s2BusinessName').textContent = activeCustomerCase.businessName || 'Merchant Partner';
+
+  const firstAsset = activeCustomerCase.mediaAssets?.[0];
+  const displayImg = document.getElementById('visionDisplayImage');
+  if (firstAsset?.mediaUrl) {
+    displayImg.src = firstAsset.mediaUrl;
+  }
+
+  // Execute SAM 3.1 analysis and generate "Damage Report - {Customer Name}"
+  const stepItems = ['vstep1', 'vstep2', 'vstep3', 'vstep4'];
+  const setStep = (idx) => {
+    stepItems.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (i < idx) el.className = 'step-line-item done';
+      else if (i === idx) el.className = 'step-line-item active';
+      else el.className = 'step-line-item';
+    });
+  };
+
+  setStep(1);
+
+  try {
+    const res = await fetch(`/api/cases/${activeCustomerCase.id}/analyze-vision`, { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    setStep(3);
+    activeDamageReport = data.damageReport;
+
+    // Render Metrics Readout
+    document.getElementById('readoutDamageRatio').textContent = activeDamageReport.damageRatioFormatted;
+    document.getElementById('readoutAssessmentStatus').textContent = activeDamageReport.assessmentStatus.replace(/_/g, ' ').toUpperCase();
+    document.getElementById('readoutProductFound').textContent = activeDamageReport.productFound ? 'Verified' : 'Ambiguous';
+
+    // Render ASD-STE100 Damage Report Artifact
+    document.getElementById('reportArtifactTitle').textContent = activeDamageReport.title;
+    document.getElementById('reportArtifactId').textContent = activeDamageReport.reportId;
+
+    const findingsContainer = document.getElementById('reportFindingsContent');
+    findingsContainer.innerHTML = '';
+    activeDamageReport.overallFindings.forEach((f) => {
+      const p = document.createElement('p');
+      p.textContent = `• ${f}`;
+      findingsContainer.appendChild(p);
+    });
+
+    // Render SVG Overlays
+    renderVisionSvgOverlay(activeDamageReport.regions || []);
+
+    // Handle Video Timestamps
+    if (activeDamageReport.videoTimestamps && activeDamageReport.videoTimestamps.length > 0) {
+      const box = document.getElementById('videoControlsBox');
+      const pills = document.getElementById('videoEventPills');
+      box.style.display = 'block';
+      pills.innerHTML = '';
+      activeDamageReport.videoTimestamps.forEach((evt) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'video-event-pill';
+        btn.textContent = `⏱️ ${evt.eventInterval} (${evt.observedDefect.substring(0, 30)}...)`;
+        btn.onclick = () => {
+          document.getElementById('videoCurrentTime').textContent = evt.eventInterval.split(' - ')[0];
+          alert(`Seeked video player to ${evt.eventInterval}. Event: ${evt.observedDefect}`);
+        };
+        pills.appendChild(btn);
+      });
+    }
+
+    document.getElementById('agentResolutionBadge').textContent = 'COMPLETED';
+    document.getElementById('agentResolutionBadge').className = 'status-pill status-ready';
+
+    // Enable Section 3
+    document.getElementById('btnNavSection3').classList.remove('disabled');
+  } catch (err) {
+    console.error('Vision analysis error:', err);
+    alert(`Vision analysis error: ${err.message}`);
+  }
+}
+
+function renderVisionSvgOverlay(regions) {
+  const overlay = document.getElementById('visionSvgLayer');
+  if (!overlay) return;
+
+  const width = 640;
+  const height = 480;
+  const elements = [];
+
+  regions.forEach((r) => {
+    const isContents = r.type === 'contents';
+    const isProduct = r.type === 'product';
+    const strokeColor = isContents ? '#ef4444' : (isProduct ? '#3b82f6' : '#f59e0b');
+    const fillColor = isContents ? 'rgba(239,68,68,0.45)' : (isProduct ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.4)');
+
+    if (r.mask && r.mask.path) {
+      elements.push(`<path class="svg-mask-element" d="${r.mask.path}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2.5" />`);
+    }
+
+    if (Array.isArray(r.bbox) && r.bbox.length === 4) {
+      const [bx, by, bw, bh] = r.bbox;
+      const x = Math.round(bx * width);
+      const y = Math.round(by * height);
+      const w = Math.round(bw * width);
+      const h = Math.round(bh * height);
+      const labelText = `${r.label.toUpperCase()} (${((r.area_ratio || 0.1) * 100).toFixed(0)}%)`;
+
+      elements.push(`
+        <rect class="svg-box-element" x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="${isProduct ? '6,4' : 'none'}" />
+        <g class="svg-box-element" transform="translate(${x}, ${Math.max(16, y - 6)})">
+          <rect x="0" y="-12" width="${labelText.length * 7}" height="16" rx="3" fill="${strokeColor}" />
+          <text x="4" y="0" fill="#ffffff" font-size="9" font-family="system-ui" font-weight="700">${labelText}</text>
+        </g>
+      `);
+    }
+  });
+
+  overlay.innerHTML = `<svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%;">${elements.join('\n')}</svg>`;
+}
+
+function toggleVisionLayer(layer) {
+  if (layer === 'mask') {
+    showMaskLayer = !showMaskLayer;
+    document.querySelectorAll('.svg-mask-element').forEach((el) => {
+      el.style.display = showMaskLayer ? 'block' : 'none';
+    });
+    document.getElementById('btnToggleMasks').classList.toggle('active', showMaskLayer);
+  } else if (layer === 'box') {
+    showBoxLayer = !showBoxLayer;
+    document.querySelectorAll('.svg-box-element').forEach((el) => {
+      el.style.display = showBoxLayer ? 'block' : 'none';
+    });
+    document.getElementById('btnToggleBoxes').classList.toggle('active', showBoxLayer);
+  }
+}
+
+function downloadDamageReportJson() {
+  if (!activeDamageReport) return;
+  const blob = new Blob([JSON.stringify(activeDamageReport, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Damage_Report_${activeCustomerCase.caseNumber}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function advanceToDecisionEngine() {
+  showCustomerSection(3);
+}
+
+// =========================================================================
+// 5. SECTION 3: DECISION ENGINE (POLICY ABSTRACTION & 4 STAGES)
+// =========================================================================
+async function initDecisionSection() {
+  if (!activeCustomerCase) return;
+
+  const stageIds = ['pstage1', 'pstage2', 'pstage3', 'pstage4'];
+  const setPStage = (idx, statusIcon) => {
+    stageIds.forEach((id, i) => {
+      const el = document.getElementById(id);
+      const icon = el.querySelector('.stage-status-icon');
+      if (i < idx) {
+        el.className = 'stage-card done';
+        icon.textContent = '✓';
+      } else if (i === idx) {
+        el.className = 'stage-card active';
+        icon.textContent = statusIcon || '⏳';
+      } else {
+        el.className = 'stage-card';
+        icon.textContent = '○';
+      }
+    });
+  };
+
+  setPStage(0, '⏳');
+
+  try {
+    const res = await fetch(`/api/cases/${activeCustomerCase.id}/decide`, { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    activeDecisionResult = data.decision;
+
+    // Render 6.1 Policy Abstraction
+    const abstraction = activeDecisionResult.policyAbstraction;
+    if (abstraction) {
+      document.getElementById('policyAbstractionHeading').textContent = abstraction.heading;
+      const pointsList = document.getElementById('policyAbstractionPoints');
+      pointsList.innerHTML = '';
+      abstraction.points.forEach((pt) => {
+        const li = document.createElement('li');
+        li.textContent = pt;
+        pointsList.appendChild(li);
+      });
+    }
+
+    // Step through the 4 stages
+    setPStage(1);
+    await new Promise((r) => setTimeout(r, 200));
+    setPStage(2);
+    await new Promise((r) => setTimeout(r, 200));
+    setPStage(3);
+    await new Promise((r) => setTimeout(r, 200));
+    setPStage(4, '✓');
+
+    // Show prominent "Model Decision Formulated"
+    document.getElementById('decisionPendingPlaceholder').style.display = 'none';
+    document.getElementById('modelDecisionFormulatedBanner').style.display = 'flex';
+    document.getElementById('decisionOutcomeBlock').style.display = 'flex';
+
+    // Outcome Type Badge
+    const typeBadge = document.getElementById('outcomeTypeBadge');
+    if (activeDecisionResult.outcomeStatus === 'auto_authorised') {
+      typeBadge.textContent = 'AUTOMATICALLY AUTHORISED';
+      typeBadge.style.color = '#34d399';
+    } else if (activeDecisionResult.outcomeStatus === 'human_review_required') {
+      typeBadge.textContent = 'HUMAN REVIEW REQUIRED';
+      typeBadge.style.color = '#f87171';
+    } else {
+      typeBadge.textContent = 'AI RECOMMENDATION (AWAITING APPROVAL)';
+      typeBadge.style.color = '#60a5fa';
+    }
+
+    // Outcome Title & Details
+    document.getElementById('outcomeTitle').textContent = formatOutcomeTitle(activeDecisionResult.finalOutcome);
+    document.getElementById('outcomeClauseText').textContent = activeDecisionResult.citedClause;
+    document.getElementById('outcomeReplyText').textContent = activeDecisionResult.customerReply;
+
+    const reasonsList = document.getElementById('outcomeReasonsList');
+    reasonsList.innerHTML = '';
+    (activeDecisionResult.reasons || []).forEach((r) => {
+      const li = document.createElement('li');
+      li.textContent = r;
+      reasonsList.appendChild(li);
+    });
+
+    document.getElementById('decisionBadgeTag').textContent = 'RESOLVED';
+    document.getElementById('decisionBadgeTag').className = 'status-pill status-ready';
+  } catch (err) {
+    console.error('Decision engine error:', err);
+    alert(`Decision error: ${err.message}`);
+  }
+}
+
+function formatOutcomeTitle(outcome) {
+  switch (outcome) {
     case 'refund':
       return 'Full Refund Approved';
     case 'replace_packaging':
       return 'Packaging Replacement / Credit Approved';
     case 'replace_item':
-      return 'Full Item Replacement Approved';
-    case 'handoff':
+    case 'replacement':
+      return 'Unit Replacement Approved';
+    case 'repair':
+      return 'Repair Authorization Approved';
+    case 'human_review':
       return 'Human Specialist Escalation Required';
+    case 'reject':
+      return 'Claim Denied Under Policy';
     default:
-      return decision;
+      return 'Claim Determination Formulated';
   }
 }
 
-// --- Evidence Tab ---
-function viewCaseEvidence(caseObj = null) {
-  const c = caseObj || currentEvidenceCase;
-  if (!c) {
-    alert('No case loaded. Please submit or select a case first.');
-    return;
-  }
-  currentEvidenceCase = c;
-  switchTab('evidence');
+// =========================================================================
+// 6. BUSINESS ENTERPRISE DASHBOARD
+// =========================================================================
+function switchBizTab(tabName) {
+  document.querySelectorAll('.sidebar-nav .nav-item').forEach((item) => item.classList.remove('active'));
+  document.querySelectorAll('.biz-tab-pane').forEach((pane) => (pane.style.display = 'none'));
 
-  // Load image
-  const imgEl = document.getElementById('evidenceImage');
-  imgEl.src = c.mediaUrl || currentUploadedBase64 || 'assets/box_crushed.svg';
+  const targetPane = document.getElementById(`bizTab-${tabName}`);
+  if (targetPane) targetPane.style.display = 'block';
 
-  // Render SVG Overlay
-  const overlayLayer = document.getElementById('svgOverlayLayer');
-  overlayLayer.innerHTML = c.evidencePacket?.vision?.svgOverlay || '';
+  event.currentTarget.classList.add('active');
 
-  // Ratio badge
-  const ratioBadge = document.getElementById('evidenceRatioBadge');
-  const ratio = (c.measurements?.packaging_damage_ratio || 0) * 100;
-  ratioBadge.textContent = `${ratio.toFixed(1)}% Damage Ratio`;
-
-  // Status pill
-  const statusPill = document.getElementById('evidenceStatusPill');
-  if (c.finalDecision === 'handoff') {
-    statusPill.className = 'status-pill status-handoff';
-    statusPill.textContent = 'HUMAN HANDOFF';
-  } else {
-    statusPill.className = 'status-pill status-auto';
-    statusPill.textContent = 'AUTO-RESOLVED';
-  }
-
-  // Guardrail Checklist
-  const flags = c.flags || [];
-  setGuardrailItem('guardrailDuplicate', flags.includes('duplicate_photo'), 'Duplicate Hash Detected');
-  setGuardrailItem('guardrailProduct', flags.includes('product_not_found'), 'Product Boundary Missing');
-  setGuardrailItem('guardrailValue', flags.includes('high_value_order'), 'Exceeds Safety Threshold');
-  setGuardrailItem('guardrailConfidence', flags.includes('low_confidence'), 'Confidence < Threshold');
-
-  // Agent Trace List
-  const traceContainer = document.getElementById('agentTraceContainer');
-  traceContainer.innerHTML = '';
-
-  const traceSteps = c.agentTrace || [];
-  traceSteps.forEach((step) => {
-    const item = document.createElement('div');
-    item.className = 'trace-item';
-    item.innerHTML = `
-      <div class="trace-header">
-        <span>${step.name || step.step}</span>
-        <span class="trace-tool">${step.tool || 'engine'}</span>
-      </div>
-      <div class="trace-detail">${step.detail}</div>
-    `;
-    traceContainer.appendChild(item);
-  });
+  if (tabName === 'analytics') loadBizAnalytics();
+  else if (tabName === 'policies') loadBizPolicies();
+  else if (tabName === 'thresholds') loadBizThresholds();
+  else if (tabName === 'human-review') loadBizHumanReview();
+  else if (tabName === 'products') loadBizProducts();
+  else if (tabName === 'ops-accuracy') loadBizOpsAccuracy();
+  else loadBizDashboard();
 }
 
-function setGuardrailItem(id, isFlagged, failReason) {
-  const el = document.getElementById(id);
-  if (isFlagged) {
-    el.className = 'guardrail-status-flag';
-    el.textContent = `✗ FLAGGED (${failReason})`;
-  } else {
-    el.className = 'guardrail-status-pass';
-    el.textContent = '✓ PASSED';
-  }
-}
+async function loadBizDashboard() {
+  if (!currentSessionToken) return;
 
-function toggleOverlayLayer(layerType) {
-  const svg = document.querySelector('#svgOverlayLayer svg');
-  if (!svg) return;
-
-  if (layerType === 'mask') {
-    showMaskLayer = !showMaskLayer;
-    svg.querySelectorAll('path').forEach((p) => {
-      p.style.display = showMaskLayer ? 'block' : 'none';
+  try {
+    // 7.1 Overview Cards
+    const overRes = await fetch('/api/business/overview', {
+      headers: { Authorization: `Bearer ${currentSessionToken}` },
     });
-    document.getElementById('toggleMaskBtn').textContent = showMaskLayer ? 'Hide Masks' : 'Show Masks';
-  } else if (layerType === 'box') {
-    showBoxLayer = !showBoxLayer;
-    svg.querySelectorAll('rect, g').forEach((r) => {
-      r.style.display = showBoxLayer ? 'block' : 'none';
-    });
-    document.getElementById('toggleBoxBtn').textContent = showBoxLayer ? 'Hide Boxes' : 'Show Boxes';
-  }
-}
+    const overData = await overRes.json();
+    if (overData.success) {
+      const o = overData.overview;
+      document.getElementById('bizMetricOpen').textContent = o.openTickets;
+      document.getElementById('bizMetricPending').textContent = o.pendingTickets;
+      document.getElementById('bizMetricHuman').textContent = o.awaitingHuman;
+      document.getElementById('bizMetricAI').textContent = o.aiHandled;
+      document.getElementById('bizMetricRefunds').textContent = o.refundsApproved;
+      document.getElementById('bizMetricReplacements').textContent = o.replacementsApproved;
+      document.getElementById('bizMetricRepairs').textContent = o.repairsApproved;
+      document.getElementById('bizMetricRejected').textContent = o.rejectedCases;
+    }
 
-function exportEvidenceJson() {
-  if (!currentEvidenceCase) {
-    alert('No active case evidence.');
-    return;
-  }
-  const packet = currentEvidenceCase.evidencePacket || currentEvidenceCase;
-  const blob = new Blob([JSON.stringify(packet, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `SnapDesk_Evidence_${currentEvidenceCase.id}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// --- Live Policy Flip Demonstration ---
-function populateFlipCaseSelect() {
-  const select = document.getElementById('flipCaseSelect');
-  select.innerHTML = '';
-  activeCases.forEach((c) => {
-    const ratio = ((c.measurements?.packaging_damage_ratio || 0) * 100).toFixed(0);
-    const opt = new Option(`Case #${c.id} (${ratio}% Damage, $${c.orderValue} - ${c.finalDecision})`, c.id);
-    select.appendChild(opt);
-  });
-  previewFlipCase();
-}
-
-function previewFlipCase() {
-  const caseId = document.getElementById('flipCaseSelect').value;
-  const c = activeCases.find((x) => x.id === caseId);
-  if (!c) return;
-
-  const box = document.getElementById('flipComparisonBox');
-  box.style.display = 'grid';
-
-  document.getElementById('flipOriginalDecision').textContent = c.finalDecision.toUpperCase();
-  document.getElementById('flipOriginalReason').textContent = `Decision under original threshold (${((c.measurements?.packaging_damage_ratio || 0) * 100).toFixed(1)}% damage)`;
-
-  document.getElementById('flipNewDecision').textContent = 'READY TO RE-EVALUATE';
-  document.getElementById('flipNewDecision').style.color = '#94a3b8';
-  document.getElementById('flipNewReason').textContent = 'Click button below to execute';
-}
-
-function setFlipPreset(thresholdPercent) {
-  document.getElementById('rulePackagingRatio').value = thresholdPercent;
-  document.getElementById('rulePackagingRatioVal').textContent = `${thresholdPercent}%`;
-}
-
-async function executePolicyFlip() {
-  const caseId = document.getElementById('flipCaseSelect').value;
-  const targetThreshold = parseFloat(document.getElementById('rulePackagingRatio').value) / 100;
-
-  try {
-    const res = await fetch(`/api/cases/${caseId}/rerun`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        rules: {
-          packaging_replace_max_ratio: targetThreshold,
-        },
-      }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error);
-
-    const newCase = data.case;
-    document.getElementById('flipNewDecision').textContent = newCase.finalDecision.toUpperCase();
-    document.getElementById('flipNewDecision').style.color = newCase.finalDecision === 'replace_packaging' ? '#34d399' : '#f87171';
-    document.getElementById('flipNewReason').textContent = `Re-evaluated under ${(targetThreshold * 100).toFixed(0)}% threshold. Flipped: ${data.flipped ? 'YES (Decision changed!)' : 'NO'}`;
-
-    await loadCaseTable();
-    await refreshUsageStats();
+    // 7.2 Inbox Complaints
+    filterInbox();
   } catch (err) {
-    alert(`Policy Flip Error: ${err.message}`);
+    console.error('Failed to load business dashboard:', err);
   }
 }
 
-// --- Operations & Accuracy Benchmark ---
-async function refreshUsageStats() {
-  try {
-    const res = await fetch('/api/usage');
-    const data = await res.json();
-    const u = data.usage;
+async function filterInbox() {
+  if (!currentSessionToken) return;
 
-    document.getElementById('meterTotalCalls').textContent = u.totalRealCalls + u.totalMockCalls;
-    document.getElementById('meterEstimatedCost').textContent = `$${u.estimatedCostUSD.toFixed(4)}`;
-    document.getElementById('meterTokenCount').textContent = `${u.tokenUsage.input} / ${u.tokenUsage.output}`;
-    document.getElementById('meterHardCap').textContent = `${u.remainingCalls} calls left`;
-  } catch (err) {
-    console.error('Failed to refresh usage:', err);
-  }
-}
-
-async function triggerBenchmarkRun() {
-  const btn = document.getElementById('runEvalBtn');
-  btn.textContent = '⏳ Running 10 Scenarios...';
-  btn.disabled = true;
+  const search = document.getElementById('inboxSearchInput')?.value || '';
+  const status = document.getElementById('inboxStatusFilter')?.value || '';
+  const handling = document.getElementById('inboxHandlingFilter')?.value || '';
 
   try {
-    const res = await fetch('/api/eval', { method: 'POST' });
+    const url = new URL('/api/business/inbox', window.location.origin);
+    if (search) url.searchParams.set('search', search);
+    if (status) url.searchParams.set('status', status);
+    if (handling) url.searchParams.set('handling', handling);
+
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${currentSessionToken}` } });
     const data = await res.json();
-    const m = data.metrics;
-
-    document.getElementById('benchAgreement').textContent = `${m.agreementRate}%`;
-    document.getElementById('benchHandoff').textContent = `${m.handoffRate}%`;
-    document.getElementById('benchWrongApproval').textContent = `${m.wrongApprovalRate}%`;
-
-    alert(`Benchmark Run Completed!\n- Agreement with Human Rulings: ${m.agreementRate}%\n- Wrong-Approval Rate: ${m.wrongApprovalRate}% (0% Safety Target Maintained)\n- Handoff Rate: ${m.handoffRate}%`);
-    await refreshUsageStats();
-  } catch (err) {
-    alert(`Benchmark execution failed: ${err.message}`);
-  } finally {
-    btn.textContent = '▶ Run Benchmark';
-    btn.disabled = false;
-  }
-}
-
-// --- Claims Table ---
-async function loadCaseTable() {
-  try {
-    const res = await fetch('/api/cases');
-    const data = await res.json();
-    activeCases = data.cases || [];
-
-    const tbody = document.getElementById('claimsTableBody');
+    const tbody = document.getElementById('bizInboxTbody');
     tbody.innerHTML = '';
 
-    activeCases.forEach((c) => {
+    if (!data.cases || data.cases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center">No complaints match your criteria.</td></tr>';
+      return;
+    }
+
+    data.cases.forEach((c) => {
       const tr = document.createElement('tr');
-      const ratio = ((c.measurements?.packaging_damage_ratio || 0) * 100).toFixed(1);
-      const isHandoff = c.finalDecision === 'handoff';
+      const isAI = c.handlingBadge === 'ai_handled';
+      const badgeClass = isAI ? 'handling-badge handling-ai' : 'handling-badge handling-human';
+      const badgeText = isAI ? 'SnapDesk AI Handled' : 'Human Intervention Required';
 
       tr.innerHTML = `
-        <td style="font-family: monospace; font-size: 0.78rem;">${c.id}</td>
-        <td>${c.policyName || c.policyId}</td>
-        <td>$${Number(c.orderValue).toFixed(2)}</td>
-        <td>${ratio}%</td>
-        <td><span class="status-pill ${isHandoff ? 'status-handoff' : 'status-auto'}">${isHandoff ? 'HANDOFF' : 'RESOLVED'}</span></td>
-        <td><strong>${c.finalDecision}</strong></td>
-        <td style="color: #f87171; font-size: 0.75rem;">${(c.flags || []).join(', ') || '—'}</td>
+        <td style="font-family: var(--font-mono); font-size: 0.75rem;"><strong>${c.caseNumber}</strong></td>
+        <td>${c.customerName}</td>
+        <td>${c.productName || 'General Item'}</td>
+        <td style="color: var(--text-dim); font-size: 0.75rem;">${new Date(c.createdAt).toLocaleDateString()}</td>
+        <td><strong style="color: var(--copper);">${c.outcome || 'pending'}</strong></td>
+        <td><span class="${badgeClass}">${badgeText}</span></td>
+        <td><button type="button" class="btn btn-sm btn-secondary" onclick="openCaseInvestigation('${c.id}')">Investigate</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Failed to filter inbox:', err);
+  }
+}
+
+// 7.3 & 7.4 Analytics & Donut Chart
+async function loadBizAnalytics() {
+  if (!currentSessionToken) return;
+
+  try {
+    // 1. Product rankings
+    const prodRes = await fetch('/api/business/analytics/products', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const prodData = await prodRes.json();
+    const pTbody = document.getElementById('bizProductRankingsTbody');
+    pTbody.innerHTML = '';
+
+    (prodData.rankedByDamage || []).forEach((p) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${p.name}</strong></td>
+        <td style="font-family: var(--font-mono); font-size: 0.72rem;">${p.sku}</td>
+        <td>${p.category}</td>
+        <td style="color: var(--accent-amber); font-weight: 700;">${p.damageComplaintCount}</td>
+        <td style="color: var(--accent-red); font-weight: 700;">${p.returnCount}</td>
+      `;
+      pTbody.appendChild(tr);
+    });
+
+    // 2. Resolution Pie / Donut Chart
+    const resRes = await fetch('/api/business/analytics/resolutions', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const resData = await resRes.json();
+
+    document.getElementById('donutTotalCount').textContent = resData.totalCases;
+    renderDonutChart(resData.distribution || []);
+  } catch (err) {
+    console.error('Failed to load analytics:', err);
+  }
+}
+
+function renderDonutChart(distribution) {
+  const svg = document.getElementById('resolutionDonutSvg');
+  const legend = document.getElementById('donutLegendContainer');
+  if (!svg || !legend) return;
+
+  svg.innerHTML = '';
+  legend.innerHTML = '';
+
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  distribution.forEach((item) => {
+    const strokeDash = (item.percentage / 100) * circumference;
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '80');
+    circle.setAttribute('cy', '80');
+    circle.setAttribute('r', radius);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', item.color);
+    circle.setAttribute('stroke-width', '18');
+    circle.setAttribute('stroke-dasharray', `${strokeDash} ${circumference - strokeDash}`);
+    circle.setAttribute('stroke-dashoffset', -offset);
+    svg.appendChild(circle);
+
+    offset += strokeDash;
+
+    // Legend Item
+    const leg = document.createElement('div');
+    leg.className = 'legend-item';
+    leg.innerHTML = `
+      <div class="legend-dot" style="background: ${item.color};"></div>
+      <span>${item.label}: <strong>${item.count}</strong> (${item.percentage}%)</span>
+    `;
+    legend.appendChild(leg);
+  });
+}
+
+// 7.5 Company Policies
+async function loadBizPolicies() {
+  if (!currentSessionToken) return;
+
+  try {
+    const res = await fetch('/api/business/policy', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    if (!data.success) return;
+
+    const active = data.activePolicy;
+    if (active) {
+      document.getElementById('policyEditorTitle').value = active.name;
+      document.getElementById('policyEditorText').value = active.rawText;
+      document.getElementById('activePolicyVersionBadge').textContent = `Version ${active.versionNumber}.0`;
+
+      // Preview box
+      document.getElementById('policyPreviewBox').innerHTML = `
+        <p><strong>Published Date:</strong> ${new Date(active.effectiveDate).toLocaleDateString()}</p>
+        <p><strong>Key Rules:</strong> Max Packaging Ratio: ${(active.rules.packaging_replace_max_ratio * 100).toFixed(0)}% | Handoff Cap: $${active.rules.handoff_order_value}</p>
+        <p><strong>Prompts:</strong> Product: "${active.prompts?.product}" | Damage: [${(active.prompts?.damage || []).join(', ')}]</p>
+      `;
+    }
+
+    const vList = document.getElementById('policyVersionHistoryList');
+    vList.innerHTML = '';
+    (data.versions || []).forEach((v) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>v${v.versionNumber}.0</strong> — ${v.name} (${new Date(v.createdAt).toLocaleDateString()} by ${v.createdBy})`;
+      vList.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Failed to load policies:', err);
+  }
+}
+
+async function publishPolicyVersion() {
+  const rawText = document.getElementById('policyEditorText').value;
+  const name = document.getElementById('policyEditorTitle').value;
+
+  try {
+    const res = await fetch('/api/business/policy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSessionToken}`,
+      },
+      body: JSON.stringify({ rawText, name, status: 'published' }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(`Policy Published Successfully! Version: ${data.policy.versionNumber}.0`);
+      loadBizPolicies();
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
+}
+
+function savePolicyDraft() {
+  alert('Policy saved as draft in local tenant state.');
+}
+
+// 7.6 Decision Thresholds
+async function loadBizThresholds() {
+  if (!currentSessionToken) return;
+
+  try {
+    const res = await fetch('/api/business/thresholds', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    if (data.thresholds?.rules) {
+      const r = data.thresholds.rules;
+      const ratio = Math.round((r.packaging_replace_max_ratio || 0.3) * 100);
+      document.getElementById('threshPackagingRatio').value = ratio;
+      document.getElementById('threshPackagingRatioVal').textContent = `${ratio}%`;
+      document.getElementById('threshHandoffValue').value = r.handoff_order_value || 200;
+
+      const conf = Math.round((r.min_confidence || 0.7) * 100);
+      document.getElementById('threshMinConfidence').value = conf;
+      document.getElementById('threshMinConfidenceVal').textContent = (conf / 100).toFixed(2);
+
+      document.getElementById('threshAutoRefund').checked = Boolean(r.auto_refund_enabled);
+      document.getElementById('threshAutoReplacement').checked = Boolean(r.auto_replacement_enabled);
+    }
+  } catch (err) {
+    console.error('Failed to load thresholds:', err);
+  }
+}
+
+function updateThreshLabel(v) {
+  document.getElementById('threshPackagingRatioVal').textContent = `${v}%`;
+}
+
+function updateConfLabel(v) {
+  document.getElementById('threshMinConfidenceVal').textContent = (v / 100).toFixed(2);
+}
+
+async function saveThresholdSettings() {
+  const payload = {
+    packaging_replace_max_ratio: parseFloat(document.getElementById('threshPackagingRatio').value) / 100,
+    handoff_order_value: parseFloat(document.getElementById('threshHandoffValue').value),
+    min_confidence: parseFloat(document.getElementById('threshMinConfidence').value) / 100,
+    auto_refund_enabled: document.getElementById('threshAutoRefund').checked,
+    auto_replacement_enabled: document.getElementById('threshAutoReplacement').checked,
+  };
+
+  try {
+    const res = await fetch('/api/business/thresholds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSessionToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Decision Thresholds updated and published successfully.');
+    }
+  } catch (err) {
+    alert(`Threshold update failed: ${err.message}`);
+  }
+}
+
+// 7.8 Human-Review Queue
+async function loadBizHumanReview() {
+  if (!currentSessionToken) return;
+
+  try {
+    const res = await fetch('/api/business/human-review', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    const tbody = document.getElementById('bizHumanReviewTbody');
+    tbody.innerHTML = '';
+
+    if (!data.cases || data.cases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center">No cases currently require human intervention.</td></tr>';
+      return;
+    }
+
+    data.cases.forEach((c) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-family: var(--font-mono); font-size: 0.75rem;"><strong>${c.caseNumber}</strong></td>
+        <td>${c.customerName}</td>
+        <td>$${(c.productCostReported || 0).toFixed(2)}</td>
+        <td>${c.measurements?.damage_ratio_formatted || '0.0%'}</td>
+        <td style="color: var(--accent-red); font-size: 0.75rem;">${c.decision?.reasons?.[0] || 'Order value exceeds safety cap'}</td>
         <td>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="inspectTableRow('${c.id}')">Inspect</button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="resolveHumanReview('${c.id}', 'refund')">Approve Refund</button>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="resolveHumanReview('${c.id}', 'replacement')">Approve Replace</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="resolveHumanReview('${c.id}', 'reject')">Deny</button>
         </td>
       `;
       tbody.appendChild(tr);
     });
   } catch (err) {
-    console.error('Failed to load cases:', err);
+    console.error('Failed to load human review queue:', err);
   }
 }
 
-function inspectTableRow(caseId) {
-  const c = activeCases.find((x) => x.id === caseId);
-  if (c) {
-    viewCaseEvidence(c);
+async function resolveHumanReview(caseId, action) {
+  const notes = prompt(`Enter adjuster notes for action: ${action.toUpperCase()}`);
+  if (notes === null) return;
+
+  try {
+    const res = await fetch(`/api/business/human-review/${caseId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSessionToken}`,
+      },
+      body: JSON.stringify({ action, notes }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(`Case ${caseId} marked as ${action.toUpperCase()}.`);
+      loadBizHumanReview();
+      loadBizDashboard();
+    }
+  } catch (err) {
+    alert(`Action failed: ${err.message}`);
   }
 }
 
+// 7.7 Product Catalogue
+async function loadBizProducts() {
+  if (!currentSessionToken) return;
+
+  try {
+    const res = await fetch('/api/business/products', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    const tbody = document.getElementById('bizProductsCatalogueTbody');
+    tbody.innerHTML = '';
+
+    (data.products || []).forEach((p) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${p.name}</strong></td>
+        <td style="font-family: var(--font-mono); font-size: 0.72rem;">${p.sku}</td>
+        <td>$${p.price.toFixed(2)}</td>
+        <td>${p.category}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Failed to load products:', err);
+  }
+}
+
+async function handleProductAdd(e) {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById('newProdName').value,
+    sku: document.getElementById('newProdSku').value,
+    price: document.getElementById('newProdPrice').value,
+    category: document.getElementById('newProdCategory').value,
+  };
+
+  try {
+    const res = await fetch('/api/business/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSessionToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(`Product ${data.product.name} added to catalogue.`);
+      e.target.reset();
+      loadBizProducts();
+    }
+  } catch (err) {
+    alert(`Failed to add product: ${err.message}`);
+  }
+}
+
+// 7.10 Ops & Accuracy (Preserved & Relocated strictly to Business UI)
+async function loadBizOpsAccuracy() {
+  try {
+    const res = await fetch('/api/business/ops-accuracy', { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    if (data.meter) {
+      const m = data.meter;
+      document.getElementById('opsTotalCalls').textContent = m.totalRealCalls + m.totalMockCalls;
+      document.getElementById('opsEstCost').textContent = `$${m.estimatedCostUSD.toFixed(4)}`;
+      document.getElementById('opsTokens').textContent = `${m.tokenUsage.input} / ${m.tokenUsage.output}`;
+      document.getElementById('opsHardCap').textContent = `${m.remainingCalls} calls left`;
+    }
+  } catch (err) {
+    console.error('Failed to load ops accuracy:', err);
+  }
+}
+
+async function runBizBenchmark() {
+  const btn = document.getElementById('btnRunOpsEval');
+  btn.disabled = true;
+  btn.textContent = '⏳ Evaluating 10 Scenarios...';
+
+  try {
+    const res = await fetch('/api/eval', { method: 'POST' });
+    const data = await res.json();
+    if (data.metrics) {
+      const m = data.metrics;
+      document.getElementById('opsBenchAgreement').textContent = `${m.agreementRate}%`;
+      document.getElementById('opsBenchHandoff').textContent = `${m.handoffRate}%`;
+      document.getElementById('opsBenchWrongApp').textContent = `${m.wrongApprovalRate}%`;
+      document.getElementById('opsBenchSanity').textContent = `${m.segmentationSanityRate}%`;
+
+      alert(`Benchmark Completed!\n• Human Agreement: ${m.agreementRate}%\n• Wrong-Approval Rate: ${m.wrongApprovalRate}% (Target: 0.0%)\n• Handoff Rate: ${m.handoffRate}%`);
+      loadBizOpsAccuracy();
+    }
+  } catch (err) {
+    alert(`Benchmark failed: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ Run 10-Case Benchmark';
+  }
+}
+
+// 7.9 Case Investigation Deep Dive Modal
+async function openCaseInvestigation(caseId) {
+  try {
+    const res = await fetch(`/api/business/cases/${caseId}`, { headers: { Authorization: `Bearer ${currentSessionToken}` } });
+    const data = await res.json();
+    if (!data.success) return;
+
+    const c = data.case;
+    const rep = data.damageReport;
+
+    document.getElementById('invCaseNumber').textContent = `${c.caseNumber} — ${c.productName || 'Package'}`;
+    document.getElementById('invCustomerMeta').textContent = `${c.customerName} (${c.customerPhone}) | Postal Code ${c.postalCode} | Cost: $${(c.productCostReported || 0).toFixed(2)}`;
+
+    const img = document.getElementById('invDisplayImg');
+    if (c.mediaAssets?.[0]?.mediaUrl) {
+      img.src = c.mediaAssets[0].mediaUrl;
+    }
+
+    document.getElementById('invDamageRatio').textContent = c.measurements?.damage_ratio_formatted || '0.0%';
+    document.getElementById('invAssessment').textContent = rep?.assessmentStatus?.replace(/_/g, ' ').toUpperCase() || 'Damage Identified';
+
+    // Render SVG
+    const svgOverlay = document.getElementById('invSvgOverlay');
+    svgOverlay.innerHTML = '';
+    if (rep?.regions) {
+      // Re-use SVG builder
+      const width = 640;
+      const height = 480;
+      const elements = rep.regions.map((r) => {
+        const color = r.type === 'contents' ? '#ef4444' : (r.type === 'product' ? '#3b82f6' : '#f59e0b');
+        return r.mask?.path ? `<path d="${r.mask.path}" fill="${color}33" stroke="${color}" stroke-width="2"/>` : '';
+      });
+      svgOverlay.innerHTML = `<svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%;">${elements.join('')}</svg>`;
+    }
+
+    // Report findings
+    const fBox = document.getElementById('invReportFindings');
+    fBox.innerHTML = '';
+    (rep?.overallFindings || ['Inspection complete.']).forEach((f) => {
+      const p = document.createElement('p');
+      p.textContent = `• ${f}`;
+      fBox.appendChild(p);
+    });
+
+    // Decision Box
+    const dBox = document.getElementById('invDecisionBox');
+    dBox.innerHTML = `
+      <p><strong>Outcome:</strong> <span style="color: var(--copper); font-weight: 700;">${c.outcome.toUpperCase()}</span> (${c.outcomeStatus})</p>
+      <p><strong>Handling:</strong> ${c.handlingBadge === 'ai_handled' ? 'SnapDesk AI Handled' : 'Human Intervention'}</p>
+      <p><strong>Clause Cited:</strong> ${c.decision?.clause || 'Clause 4.1'}</p>
+      <p><strong>Explanation:</strong> "${c.decision?.customerReply || c.writtenComplaint}"</p>
+    `;
+
+    document.getElementById('caseInvestigateModal').style.display = 'flex';
+  } catch (err) {
+    console.error('Failed to open case investigation:', err);
+  }
+}
+
+function closeInvestigateModal() {
+  document.getElementById('caseInvestigateModal').style.display = 'none';
+}
