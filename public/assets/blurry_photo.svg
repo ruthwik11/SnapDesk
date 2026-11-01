@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="640" height="480">
+  <defs>
+    <filter id="blurFilter">
+      <feGaussianBlur stdDeviation="15"/>
+    </filter>
+  </defs>
+  <rect width="640" height="480" fill="#78716c"/>
+  <circle cx="200" cy="200" r="140" fill="#a8a29e" filter="url(#blurFilter)"/>
+  <rect x="250" y="220" width="280" height="180" fill="#57534e" filter="url(#blurFilter)"/>
+  <text x="320" y="240" font-family="system-ui, sans-serif" font-size="20" fill="#f5f5f4" opacity="0.4" text-anchor="middle">Unfocused / Ambiguous Frame</text>
+  <text x="320" y="440" font-family="system-ui, sans-serif" font-size="14" fill="#d6d3d1" text-anchor="middle">Sample Ambiguity Test (Product Boundaries Unidentifiable)</text>
+</svg>

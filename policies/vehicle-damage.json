@@ -1,0 +1,34 @@
+{
+  "id": "vehicle-damage",
+  "name": "Vehicle Rental Inspection",
+  "category": "Mobility & Fleet Rentals",
+  "text": "Returned rental vehicles undergo visual damage inspection against previous check-out state. Structural damage, broken windshields, or punctured tires warrant immediate damage fee assessment and claim escalation under Clause 2.1. Superficial body scratches or bumper scuffs covering 10% or less of the panel surface are treated as standard road wear and tear with zero customer charge under Clause 2.2. Panel scratches exceeding 10% ratio are charged a standard repair debit under Clause 2.3. Any incident where repair estimate or rental contract exceeds $400.00 mandates manual review by a fleet supervisor under Clause 6.1. Minimum decision confidence required is 0.80 under Clause 9.3.",
+  "rules": {
+    "refund_if_contents_damaged": true,
+    "packaging_replace_max_ratio": 0.10,
+    "handoff_order_value": 400,
+    "min_confidence": 0.80
+  },
+  "prompts": {
+    "product": "car body panel",
+    "damage": [
+      "scratch",
+      "bumper dent",
+      "paint chip",
+      "scuff mark"
+    ],
+    "contents": [
+      "cracked windshield",
+      "dented door",
+      "punctured tire",
+      "broken headlight"
+    ]
+  },
+  "clauses": {
+    "refund": "Clause 2.1: Severe structural panel intrusion or glass fracture confirmed by inspection requires formal claim processing.",
+    "replace_packaging": "Clause 2.2: Normal wear-and-tear superficial marks (<=10% panel area) are waived with zero charge.",
+    "replace_item": "Clause 2.3: Moderate panel abrasion (>10% panel area) incurs standard refurbishment charge.",
+    "handoff_high_value": "Clause 6.1: Contracts or incidents with value exceeding $400.00 must be reviewed by a fleet supervisor.",
+    "handoff_uncertain": "Clause 9.3: Ambiguous lighting or vehicle angle below 80% confidence requires human technician audit."
+  }
+}

@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables & secrets (CRITICAL: NEVER COMMIT)
+.env
+.env.*
+!.env.example
+
+# Runtime data & uploads
+uploads/
+temp/
+*.log
+
+# Reference material cloned locally
+Books/
+
+# OS generated files
+.DS_Store
+Thumbs.db

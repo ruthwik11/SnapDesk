@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="640" height="480">
+  <rect width="640" height="480" fill="#f8fafc"/>
+  <!-- Open Box Top -->
+  <polygon points="100,200 320,120 540,200 320,280" fill="#92400e" stroke="#451a03" stroke-width="3"/>
+  <polygon points="100,200 320,280 320,430 100,350" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+  <polygon points="320,280 540,200 540,350 320,430" fill="#b45309" stroke="#451a03" stroke-width="3"/>
+  <!-- Open flaps -->
+  <polygon points="100,200 80,120 220,100 320,120" fill="#d97706" opacity="0.9"/>
+  <polygon points="540,200 560,120 420,100 320,120" fill="#d97706" opacity="0.9"/>
+  <!-- Shattered Porcelain Vase inside -->
+  <ellipse cx="320" cy="240" rx="90" ry="40" fill="#1e293b"/>
+  <path d="M 270,220 L 310,210 L 300,240 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M 330,215 L 370,230 L 340,250 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M 280,245 L 330,255 L 305,270 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M 315,225 L 335,235 L 320,250 Z" fill="#e2e8f0" stroke="#64748b"/>
+  <text x="320" y="460" font-family="system-ui, sans-serif" font-size="14" fill="#ef4444" font-weight="600" text-anchor="middle">Sample Parcel #B-9102 (Shattered Fragile Contents)</text>
+</svg>

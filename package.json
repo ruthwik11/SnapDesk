@@ -1,0 +1,30 @@
+{
+  "name": "snapdesk",
+  "version": "1.0.0",
+  "description": "SnapDesk - Customer support that can see. Autonomous visual damage triage and policy enforcement agent powered by Meta SAM 3.1 and Muse Spark.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "eval": "node src/eval.js",
+    "test": "node test/test_pipeline.js"
+  },
+  "keywords": [
+    "meta-ai",
+    "sam-3.1",
+    "muse-spark",
+    "customer-support",
+    "computer-vision",
+    "agentic-ai"
+  ],
+  "author": "Ruthwik",
+  "license": "MIT",
+  "dependencies": {
+    "@meta-sam/parser": "^0.1.0",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "openai": "^7.47.0"
+  }
+}

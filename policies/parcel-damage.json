@@ -1,0 +1,33 @@
+{
+  "id": "parcel-damage",
+  "name": "Parcel Delivery Damage",
+  "category": "E-Commerce & Logistics",
+  "text": "Parcels delivered with visible damage are triaged based on packaging vs item impact. If the contents or item inside is damaged or broken, a full refund is approved immediately under Clause 4.1. If only the outer cardboard packaging or box is damaged with a damage ratio at or below 30% and contents remain intact, packaging replacement or a repackaging credit is issued under Clause 4.2. Outer packaging damage exceeding 30% qualifies for item replacement under Clause 4.3. Any claim with order value exceeding $200.00 requires mandatory human specialist handoff under Clause 8.2. Minimum decision confidence required is 0.70 under Clause 9.1.",
+  "rules": {
+    "refund_if_contents_damaged": true,
+    "packaging_replace_max_ratio": 0.30,
+    "handoff_order_value": 200,
+    "min_confidence": 0.70
+  },
+  "prompts": {
+    "product": "cardboard box",
+    "damage": [
+      "crushed corner",
+      "torn cardboard",
+      "dented box",
+      "puncture hole"
+    ],
+    "contents": [
+      "broken item",
+      "damaged contents",
+      "spilled contents"
+    ]
+  },
+  "clauses": {
+    "refund": "Clause 4.1: Direct item/contents damage confirmed by visual inspection qualifies for immediate customer refund.",
+    "replace_packaging": "Clause 4.2: Minor superficial packaging damage (<=30% surface area) with intact contents qualifies for packaging replacement or store credit.",
+    "replace_item": "Clause 4.3: Severe packaging deformation (>30% surface area) posing risk of concealed damage qualifies for item replacement.",
+    "handoff_high_value": "Clause 8.2: High-value orders exceeding $200.00 threshold must be routed to human review.",
+    "handoff_uncertain": "Clause 9.1: Insufficient visual confidence (<70%) or missing product boundaries requires human specialist escalation."
+  }
+}

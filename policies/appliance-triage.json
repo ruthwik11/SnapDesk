@@ -1,0 +1,35 @@
+{
+  "id": "appliance-triage",
+  "name": "Home Appliance Triage",
+  "category": "Consumer Electronics & Appliances",
+  "text": "Delivered home appliances with visual defects are assessed for structural vs cosmetic impairment. Critical structural or functional defects (such as cracked glass panels, deep chassis cracks, liquid leaks, or thermal scorch marks) warrant an immediate refund or expedited unit replacement under Clause 3.1. Cosmetic surface imperfections (scratches or light scuffs) affecting 15% or less of the visible appliance surface qualify for a 20% cosmetic goodwill discount or touch-up kit under Clause 3.2. Cosmetic defects exceeding 15% qualify for a complete unit replacement under Clause 3.3. Claims for appliances with order value exceeding $500.00 require human inspection under Clause 7.4. Minimum decision confidence required is 0.75 under Clause 9.2.",
+  "rules": {
+    "refund_if_contents_damaged": true,
+    "packaging_replace_max_ratio": 0.15,
+    "handoff_order_value": 500,
+    "min_confidence": 0.75
+  },
+  "prompts": {
+    "product": "appliance",
+    "damage": [
+      "scratch",
+      "dent",
+      "cracked glass",
+      "scuffed surface",
+      "broken handle"
+    ],
+    "contents": [
+      "cracked screen",
+      "exposed wire",
+      "liquid leak",
+      "scorch mark"
+    ]
+  },
+  "clauses": {
+    "refund": "Clause 3.1: Critical structural, functional, or electrical defect confirmed by visual evidence qualifies for immediate refund.",
+    "replace_packaging": "Clause 3.2: Minor superficial cosmetic defect (<=15% surface area) qualifies for cosmetic allowance credit or touch-up assistance.",
+    "replace_item": "Clause 3.3: Substantial cosmetic defect (>15% surface area) qualifies for complete unit replacement.",
+    "handoff_high_value": "Clause 7.4: High-value consumer appliances exceeding $500.00 threshold mandate senior human adjuster review.",
+    "handoff_uncertain": "Clause 9.2: Visual ambiguity or confidence below 75% requires mandatory routing to appliance triage specialists."
+  }
+}

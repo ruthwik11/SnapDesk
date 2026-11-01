@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="640" height="480">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="boxTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="boxFront" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Floor/Desk -->
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <!-- Cardboard Box -->
+  <polygon points="120,160 320,100 520,160 320,230" fill="url(#boxTop)" stroke="#78350f" stroke-width="3"/>
+  <polygon points="120,160 320,230 320,410 120,330" fill="url(#boxFront)" stroke="#78350f" stroke-width="3"/>
+  <polygon points="320,230 520,160 520,330 320,410" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+  <!-- Shipping Label -->
+  <rect x="180" y="240" width="90" height="60" rx="3" fill="#ffffff" transform="skewY(14)"/>
+  <line x1="190" y1="260" x2="250" y2="260" stroke="#000000" stroke-width="3" transform="skewY(14)"/>
+  <line x1="190" y1="270" x2="240" y2="270" stroke="#000000" stroke-width="2" transform="skewY(14)"/>
+  <line x1="190" y1="280" x2="230" y2="280" stroke="#000000" stroke-width="2" transform="skewY(14)"/>
+  <!-- Visible Crushed Corner & Tear -->
+  <path d="M 460,140 Q 520,150 535,210 Q 510,250 450,230 Q 420,170 460,140 Z" fill="#451a03" opacity="0.85"/>
+  <path d="M 480,160 L 510,220 L 460,200 Z" fill="#1c1917"/>
+  <text x="320" y="460" font-family="system-ui, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Sample Parcel #A-4892 (Corner Transit Impact)</text>
+</svg>
