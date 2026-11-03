@@ -189,3 +189,46 @@ VALUES
   ('thresh_nordic_v1', 'biz_nordic', 'pol_nordic_v1', 1, '{"packaging_replace_max_ratio": 0.15, "handoff_order_value": 500.0, "min_confidence": 0.75, "auto_refund_enabled": true, "auto_replacement_enabled": true}'::jsonb),
   ('thresh_velocity_v1', 'biz_velocity', 'pol_velocity_v1', 1, '{"packaging_replace_max_ratio": 0.10, "handoff_order_value": 400.0, "min_confidence": 0.80, "auto_refund_enabled": false, "auto_replacement_enabled": false}'::jsonb)
 ON CONFLICT (version_id) DO NOTHING;
+
+-- ==============================================================================
+-- Row Level Security (RLS) Permissive Policies (for Prototype / Multi-Tenant API)
+-- Run these statements in Supabase SQL Editor if you are connecting with the Publishable / Anon Key
+-- ==============================================================================
+ALTER TABLE public.businesses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.policy_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.threshold_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.damage_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.human_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all access on businesses" ON public.businesses;
+CREATE POLICY "Allow all access on businesses" ON public.businesses FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on users" ON public.users;
+CREATE POLICY "Allow all access on users" ON public.users FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on products" ON public.products;
+CREATE POLICY "Allow all access on products" ON public.products FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on policy_versions" ON public.policy_versions;
+CREATE POLICY "Allow all access on policy_versions" ON public.policy_versions FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on threshold_versions" ON public.threshold_versions;
+CREATE POLICY "Allow all access on threshold_versions" ON public.threshold_versions FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on cases" ON public.cases;
+CREATE POLICY "Allow all access on cases" ON public.cases FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on damage_reports" ON public.damage_reports;
+CREATE POLICY "Allow all access on damage_reports" ON public.damage_reports FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on human_reviews" ON public.human_reviews;
+CREATE POLICY "Allow all access on human_reviews" ON public.human_reviews FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all access on audit_logs" ON public.audit_logs;
+CREATE POLICY "Allow all access on audit_logs" ON public.audit_logs FOR ALL TO public USING (true) WITH CHECK (true);
+
+

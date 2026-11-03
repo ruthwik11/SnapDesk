@@ -7,6 +7,18 @@ import crypto from 'node:crypto';
 import { authService } from '../services/auth.js';
 import { supabase, isSupabaseConfigured } from '../services/supabase.js';
 
+function safeWrite(promise, label) {
+  if (!promise || typeof promise.then !== 'function') return;
+  promise.then(
+    ({ error }) => {
+      if (error) console.warn(`[Supabase] ${label} error:`, error.message);
+    },
+    (err) => {
+      console.warn(`[Supabase] ${label} network error:`, err?.message || err);
+    }
+  );
+}
+
 class TenantStore {
   constructor() {
     this.users = new Map();              // userId -> user
@@ -51,6 +63,49 @@ class TenantStore {
             createdAt: b.created_at,
           });
         });
+      } else {
+        // Seed remote Supabase with baseline business tenants
+        for (const biz of this.businesses.values()) {
+          const { error } = await supabase.from('businesses').upsert({
+            id: biz.id,
+            name: biz.name,
+            category: biz.category,
+            display_description: biz.displayDescription,
+            contact_email: biz.contactEmail,
+            contact_phone: biz.contactPhone,
+            active: biz.active ?? true,
+            created_at: biz.createdAt || new Date().toISOString(),
+          });
+          if (error) console.warn('[Supabase] Initial seed business error:', error.message);
+        }
+        for (const pol of this.policyVersions.values()) {
+          const { error } = await supabase.from('policy_versions').upsert({
+            version_id: pol.versionId,
+            business_id: pol.businessId,
+            version_number: pol.versionNumber,
+            name: pol.name,
+            raw_text: pol.rawText,
+            rules: pol.rules,
+            prompts: pol.prompts,
+            clauses: pol.clauses,
+            status: pol.status,
+            effective_date: pol.effectiveDate || new Date().toISOString(),
+            created_by: pol.createdBy,
+            created_at: pol.createdAt || new Date().toISOString(),
+          });
+          if (error) console.warn('[Supabase] Initial seed policy error:', error.message);
+        }
+        for (const thresh of this.thresholdVersions.values()) {
+          const { error } = await supabase.from('threshold_versions').upsert({
+            version_id: thresh.versionId,
+            business_id: thresh.businessId,
+            policy_version_id: thresh.policyVersionId,
+            version_number: thresh.versionNumber,
+            rules: thresh.rules,
+            created_at: thresh.createdAt || new Date().toISOString(),
+          });
+          if (error) console.warn('[Supabase] Initial seed threshold error:', error.message);
+        }
       }
 
       const { data: uList } = await supabase.from('users').select('*');
@@ -398,17 +453,20 @@ class TenantStore {
   addUser(user) {
     this.users.set(user.id, user);
     if (isSupabaseConfigured) {
-      supabase.from('users').upsert({
-        id: user.id,
-        email: user.email,
-        salt: user.salt,
-        hash: user.hash,
-        name: user.name,
-        role: user.role,
-        business_id: user.businessId || null,
-        phone: user.phone || null,
-        created_at: user.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] addUser error:', e.message));
+      safeWrite(
+        supabase.from('users').upsert({
+          id: user.id,
+          email: user.email,
+          salt: user.salt,
+          hash: user.hash,
+          name: user.name,
+          role: user.role,
+          business_id: user.businessId || null,
+          phone: user.phone || null,
+          created_at: user.createdAt || new Date().toISOString(),
+        }),
+        'addUser'
+      );
     }
     return user;
   }
@@ -416,16 +474,19 @@ class TenantStore {
   addBusiness(biz) {
     this.businesses.set(biz.id, biz);
     if (isSupabaseConfigured) {
-      supabase.from('businesses').upsert({
-        id: biz.id,
-        name: biz.name,
-        category: biz.category,
-        display_description: biz.displayDescription,
-        contact_email: biz.contactEmail,
-        contact_phone: biz.contactPhone,
-        active: biz.active ?? true,
-        created_at: biz.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] addBusiness error:', e.message));
+      safeWrite(
+        supabase.from('businesses').upsert({
+          id: biz.id,
+          name: biz.name,
+          category: biz.category,
+          display_description: biz.displayDescription,
+          contact_email: biz.contactEmail,
+          contact_phone: biz.contactPhone,
+          active: biz.active ?? true,
+          created_at: biz.createdAt || new Date().toISOString(),
+        }),
+        'addBusiness'
+      );
     }
     return biz;
   }
@@ -433,17 +494,20 @@ class TenantStore {
   addProduct(product) {
     this.products.set(product.id, product);
     if (isSupabaseConfigured) {
-      supabase.from('products').upsert({
-        id: product.id,
-        business_id: product.businessId,
-        sku: product.sku,
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        return_window_days: product.returnWindowDays || 14,
-        active: product.active ?? true,
-        created_at: product.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] addProduct error:', e.message));
+      safeWrite(
+        supabase.from('products').upsert({
+          id: product.id,
+          business_id: product.businessId,
+          sku: product.sku,
+          name: product.name,
+          category: product.category,
+          price: product.price,
+          return_window_days: product.returnWindowDays || 14,
+          active: product.active ?? true,
+          created_at: product.createdAt || new Date().toISOString(),
+        }),
+        'addProduct'
+      );
     }
     return product;
   }
@@ -470,20 +534,23 @@ class TenantStore {
   savePolicyVersion(policyVersion) {
     this.policyVersions.set(policyVersion.versionId, policyVersion);
     if (isSupabaseConfigured) {
-      supabase.from('policy_versions').upsert({
-        version_id: policyVersion.versionId,
-        business_id: policyVersion.businessId,
-        version_number: policyVersion.versionNumber,
-        name: policyVersion.name,
-        raw_text: policyVersion.rawText,
-        rules: policyVersion.rules,
-        prompts: policyVersion.prompts,
-        clauses: policyVersion.clauses,
-        status: policyVersion.status,
-        effective_date: policyVersion.effectiveDate || new Date().toISOString(),
-        created_by: policyVersion.createdBy,
-        created_at: policyVersion.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] savePolicyVersion error:', e.message));
+      safeWrite(
+        supabase.from('policy_versions').upsert({
+          version_id: policyVersion.versionId,
+          business_id: policyVersion.businessId,
+          version_number: policyVersion.versionNumber,
+          name: policyVersion.name,
+          raw_text: policyVersion.rawText,
+          rules: policyVersion.rules,
+          prompts: policyVersion.prompts,
+          clauses: policyVersion.clauses,
+          status: policyVersion.status,
+          effective_date: policyVersion.effectiveDate || new Date().toISOString(),
+          created_by: policyVersion.createdBy,
+          created_at: policyVersion.createdAt || new Date().toISOString(),
+        }),
+        'savePolicyVersion'
+      );
     }
     return policyVersion;
   }
@@ -498,14 +565,17 @@ class TenantStore {
   saveThresholdVersion(thresholdVersion) {
     this.thresholdVersions.set(thresholdVersion.versionId, thresholdVersion);
     if (isSupabaseConfigured) {
-      supabase.from('threshold_versions').upsert({
-        version_id: thresholdVersion.versionId,
-        business_id: thresholdVersion.businessId,
-        policy_version_id: thresholdVersion.policyVersionId,
-        version_number: thresholdVersion.versionNumber,
-        rules: thresholdVersion.rules,
-        created_at: thresholdVersion.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] saveThresholdVersion error:', e.message));
+      safeWrite(
+        supabase.from('threshold_versions').upsert({
+          version_id: thresholdVersion.versionId,
+          business_id: thresholdVersion.businessId,
+          policy_version_id: thresholdVersion.policyVersionId,
+          version_number: thresholdVersion.versionNumber,
+          rules: thresholdVersion.rules,
+          created_at: thresholdVersion.createdAt || new Date().toISOString(),
+        }),
+        'saveThresholdVersion'
+      );
     }
     return thresholdVersion;
   }
@@ -524,33 +594,36 @@ class TenantStore {
     this.logAudit(caseData.businessId, caseData.customerName || 'Customer', 'CASE_SUBMITTED', `New ticket filed: ${caseData.caseNumber}`);
 
     if (isSupabaseConfigured) {
-      supabase.from('cases').insert({
-        id: caseData.id,
-        case_number: caseData.caseNumber,
-        business_id: caseData.businessId,
-        customer_id: caseData.customerId || null,
-        customer_name: caseData.customerName,
-        customer_phone: caseData.customerPhone,
-        postal_code: caseData.postalCode,
-        product_id: caseData.productId || null,
-        product_name: caseData.productName || null,
-        product_cost_reported: caseData.productCostReported || null,
-        product_cost_verified: caseData.productCostVerified || null,
-        written_complaint: caseData.writtenComplaint || null,
-        voice_transcript: caseData.voiceTranscript || null,
-        status: caseData.status,
-        outcome: caseData.outcome || null,
-        outcome_status: caseData.outcomeStatus || null,
-        handling_badge: caseData.handlingBadge || null,
-        policy_version_id: caseData.policyVersionId || null,
-        threshold_version_id: caseData.thresholdVersionId || null,
-        damage_report_id: caseData.damageReportId || null,
-        media_assets: caseData.mediaAssets || [],
-        measurements: caseData.measurements || {},
-        decision: caseData.decision || {},
-        created_at: caseData.createdAt,
-        updated_at: caseData.updatedAt,
-      }).catch((e) => console.warn('[Supabase] createCase error:', e.message));
+      safeWrite(
+        supabase.from('cases').insert({
+          id: caseData.id,
+          case_number: caseData.caseNumber,
+          business_id: caseData.businessId,
+          customer_id: caseData.customerId || null,
+          customer_name: caseData.customerName,
+          customer_phone: caseData.customerPhone,
+          postal_code: caseData.postalCode,
+          product_id: caseData.productId || null,
+          product_name: caseData.productName || null,
+          product_cost_reported: caseData.productCostReported || null,
+          product_cost_verified: caseData.productCostVerified || null,
+          written_complaint: caseData.writtenComplaint || null,
+          voice_transcript: caseData.voiceTranscript || null,
+          status: caseData.status,
+          outcome: caseData.outcome || null,
+          outcome_status: caseData.outcomeStatus || null,
+          handling_badge: caseData.handlingBadge || null,
+          policy_version_id: caseData.policyVersionId || null,
+          threshold_version_id: caseData.thresholdVersionId || null,
+          damage_report_id: caseData.damageReportId || null,
+          media_assets: caseData.mediaAssets || [],
+          measurements: caseData.measurements || {},
+          decision: caseData.decision || {},
+          created_at: caseData.createdAt,
+          updated_at: caseData.updatedAt,
+        }),
+        'createCase'
+      );
     }
     return caseData;
   }
@@ -566,16 +639,19 @@ class TenantStore {
     this.cases.set(caseId, updated);
 
     if (isSupabaseConfigured) {
-      supabase.from('cases').update({
-        status: updated.status,
-        outcome: updated.outcome,
-        outcome_status: updated.outcomeStatus,
-        handling_badge: updated.handlingBadge,
-        damage_report_id: updated.damageReportId,
-        measurements: updated.measurements,
-        decision: updated.decision,
-        updated_at: updated.updatedAt,
-      }).eq('id', caseId).catch((e) => console.warn('[Supabase] updateCase error:', e.message));
+      safeWrite(
+        supabase.from('cases').update({
+          status: updated.status,
+          outcome: updated.outcome,
+          outcome_status: updated.outcomeStatus,
+          handling_badge: updated.handlingBadge,
+          damage_report_id: updated.damageReportId,
+          measurements: updated.measurements,
+          decision: updated.decision,
+          updated_at: updated.updatedAt,
+        }).eq('id', caseId),
+        'updateCase'
+      );
     }
     return updated;
   }
@@ -605,24 +681,27 @@ class TenantStore {
   saveDamageReport(report) {
     this.damageReports.set(report.reportId, report);
     if (isSupabaseConfigured) {
-      supabase.from('damage_reports').upsert({
-        report_id: report.reportId,
-        case_id: report.caseId,
-        business_id: report.businessId,
-        customer_name: report.customerName,
-        title: report.title,
-        status: report.status,
-        assessment_status: report.assessmentStatus,
-        damage_ratio: report.damageRatio,
-        damage_ratio_formatted: report.damageRatioFormatted,
-        product_found: report.productFound,
-        contents_damaged: report.contentsDamaged,
-        video_timestamps: report.videoTimestamps || [],
-        measurements: report.measurements || {},
-        regions: report.regions || [],
-        overall_findings: report.overallFindings || [],
-        created_at: report.createdAt || new Date().toISOString(),
-      }).catch((e) => console.warn('[Supabase] saveDamageReport error:', e.message));
+      safeWrite(
+        supabase.from('damage_reports').upsert({
+          report_id: report.reportId,
+          case_id: report.caseId,
+          business_id: report.businessId,
+          customer_name: report.customerName,
+          title: report.title,
+          status: report.status,
+          assessment_status: report.assessmentStatus,
+          damage_ratio: report.damageRatio,
+          damage_ratio_formatted: report.damageRatioFormatted,
+          product_found: report.productFound,
+          contents_damaged: report.contentsDamaged,
+          video_timestamps: report.videoTimestamps || [],
+          measurements: report.measurements || {},
+          regions: report.regions || [],
+          overall_findings: report.overallFindings || [],
+          created_at: report.createdAt || new Date().toISOString(),
+        }),
+        'saveDamageReport'
+      );
     }
     return report;
   }
@@ -646,15 +725,18 @@ class TenantStore {
     this.logAudit(review.businessId, review.reviewerName, 'HUMAN_REVIEW_ACTION', `Case ${review.caseId} decided as ${review.action}: ${review.notes}`);
 
     if (isSupabaseConfigured) {
-      supabase.from('human_reviews').insert({
-        review_id: review.reviewId,
-        case_id: review.caseId,
-        business_id: review.businessId,
-        reviewer_name: review.reviewerName,
-        action: review.action,
-        notes: review.notes,
-        timestamp: review.timestamp,
-      }).catch((e) => console.warn('[Supabase] addHumanReview error:', e.message));
+      safeWrite(
+        supabase.from('human_reviews').insert({
+          review_id: review.reviewId,
+          case_id: review.caseId,
+          business_id: review.businessId,
+          reviewer_name: review.reviewerName,
+          action: review.action,
+          notes: review.notes,
+          timestamp: review.timestamp,
+        }),
+        'addHumanReview'
+      );
     }
     return review;
   }
@@ -674,14 +756,17 @@ class TenantStore {
     if (this.auditLogs.length > 200) this.auditLogs.pop();
 
     if (isSupabaseConfigured) {
-      supabase.from('audit_logs').insert({
-        id: logItem.id,
-        business_id: logItem.businessId,
-        actor: logItem.actor,
-        action: logItem.action,
-        details: logItem.details,
-        timestamp: logItem.timestamp,
-      }).catch((e) => console.warn('[Supabase] logAudit error:', e.message));
+      safeWrite(
+        supabase.from('audit_logs').insert({
+          id: logItem.id,
+          business_id: logItem.businessId,
+          actor: logItem.actor,
+          action: logItem.action,
+          details: logItem.details,
+          timestamp: logItem.timestamp,
+        }),
+        'logAudit'
+      );
     }
   }
 
