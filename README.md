@@ -198,44 +198,71 @@ npm run eval
 ## 9. Code Structure
 
 ```
-snapdesk/
-├── policies/                    # Swappable business policy templates
-│   ├── parcel-damage.json       # Parcel delivery triage rules & SAM prompts
-│   ├── appliance-triage.json    # Consumer appliance structural vs cosmetic rules
-│   └── vehicle-damage.json      # Vehicle rental return rules & panel thresholds
-├── src/
-│   ├── agent.js                 # Central Autonomous Agent Orchestrator & Trace
-│   ├── cache.js                 # SHA-256 media registry & vision cache
-│   ├── config.js                # Environment, safety limits, model registry
-│   ├── eval.js                  # Benchmark evaluation script (human vs AI)
-│   ├── evidence.js              # Vector SVG renderer & evidence packet builder
-│   ├── guardrails.js            # Plain-code deterministic override rules
-│   ├── meter.js                 # API call counter, token meter & cost estimator
-│   ├── server.js                # Express REST API & static server
-│   ├── store.js                 # Case repository & policy disk persistence
-│   ├── decision/                # Muse Spark reasoning adapters
-│   │   ├── index.js             # Unified decision interface
-│   │   ├── spark_real.js        # Meta Model API structured output adapter
-│   │   ├── spark_mock.js        # High-fidelity deterministic mock engine
+SD-f&b/
+├── frontend/                     # Modular React + Vite interface
+│   ├── src/
+│   │   ├── fx/                   # WebGL shaders & aesthetic visual layers (MagicRings, DaVinciGeometry, Brushstroke)
+│   │   ├── nav/                  # Floating island CardNav bar & responsive navigation drawer
+│   │   ├── story/                # Hero storytelling, Japanese curtain overlay, & portal cards
+│   │   ├── intake/               # Customer dispute intake, SAM 3.1 vision inspection, & Muse Spark decision flow
+│   │   ├── hub/                  # Enterprise multi-tenant operations hub (inbox, analytics, policies, human review)
+│   │   ├── gates/                # Omni search modal (Cmd+K) & AuthModal dialogs
+│   │   ├── motion/               # Smooth scrolling & Lenis inertial physics provider
+│   │   ├── hooks/                # Reactive keyboard and search utilities
+│   │   ├── services/             # Unified API integration client
+│   │   ├── App.jsx               # Application root controller
+│   │   ├── index.css             # Comfortaa & Helvetica design token typography
+│   │   └── main.jsx              # React DOM entry point
+│   └── index.html                # Vite client HTML template
+├── policies/                     # Swappable business policy templates
+│   ├── parcel-damage.json        # Parcel delivery triage rules & SAM prompts
+│   ├── appliance-triage.json     # Consumer appliance structural vs cosmetic rules
+│   └── vehicle-damage.json       # Vehicle rental return rules & panel thresholds
+├── public/                       # Static production bundle & test media assets
+│   ├── index.html                # Compiled landing shell
+│   ├── assets/                   # Optimized assets and test SVGs
+│   └── fonts/                    # Bundled Comfortaa variable font assets
+├── src/                          # Authoritative Node.js/Express backend
+│   ├── agent.js                  # Autonomous Agent Orchestrator & Trace
+│   ├── cache.js                  # SHA-256 media registry & vision cache
+│   ├── config.js                 # Environment, safety limits, model registry
+│   ├── eval.js                   # Benchmark evaluation script (human vs AI)
+│   ├── evidence.js               # Vector SVG renderer & evidence packet builder
+│   ├── guardrails.js             # Plain-code deterministic override rules
+│   ├── meter.js                  # API call counter, token meter & cost estimator
+│   ├── server.js                 # Express REST API & static server
+│   ├── store.js                  # Case repository & policy disk persistence
+│   ├── decision/                 # Muse Spark reasoning adapters
+│   │   ├── index.js              # Unified decision interface
+│   │   ├── spark_real.js         # Meta Model API structured output adapter
+│   │   ├── spark_mock.js         # High-fidelity deterministic mock engine
 │   │   ├── spark_policy_compiler.js # AI policy prose-to-rules compiler
-│   │   └── spark_summary.js     # Handoff summary & audit timeline generator
-│   ├── vision/                  # SAM 3.1 computer-vision adapters
-│   │   ├── index.js             # Unified vision interface with cache
-│   │   ├── sam_real.js          # Streaming SAM 3.1 Responses API adapter
-│   │   └── sam_mock.js          # Deterministic polygon & SVG mock generator
-│   └── voice/                   # Muse Voice Transcribe adapter
-│       └── transcribe.js        # 24 kHz WAV speech-to-text adapter
-├── public/                      # Static web interface
-│   ├── index.html               # 4-tab mobile-responsive interface
-│   ├── styles.css               # Clean Tailwind-style dark UI
-│   ├── app.js                   # Client-side agent controller
-│   └── assets/                  # Sample test assets (crushed, broken, etc.)
+│   │   └── spark_summary.js      # Handoff summary & audit timeline generator
+│   ├── models/                   # Multi-tenant data store & isolation
+│   │   └── tenant_store.js       # Tenant repository (businesses, policies, cases, audit logs)
+│   ├── routes/                   # REST API routes
+│   │   ├── auth_routes.js        # Authentication & session token management
+│   │   ├── business_routes.js    # Merchant operations, policy editor & telemetry
+│   │   └── case_routes.js        # Customer dispute submission & media ingest
+│   ├── services/                 # Core domain services
+│   │   ├── auth.js               # Cryptographic password hashing & session management
+│   │   ├── decision_service.js   # 4-stage decision pipeline & guardrails binding
+│   │   └── vision_service.js     # SAM 3.1 polygon mask quantification & ASD-STE100 findings
+│   ├── vision/                   # SAM 3.1 computer-vision adapters
+│   │   ├── index.js              # Unified vision interface with cache
+│   │   ├── sam_real.js           # Streaming SAM 3.1 Responses API adapter
+│   │   └── sam_mock.js           # Deterministic polygon & SVG mock generator
+│   └── voice/                    # Muse Voice Transcribe adapter
+│       └── transcribe.js         # 24 kHz WAV speech-to-text adapter
 ├── test/
-│   ├── test_pipeline.js         # Integration tests for all 7 guardrails
-│   └── test_server_endpoints.js # HTTP endpoint verification
-├── .env.example                 # Environment configuration template
-├── .gitignore                   # Secrets and upload exclusions
-└── package.json
+│   ├── test_multitenant_platform.js # Master 6-suite platform acceptance tests
+│   ├── test_pipeline.js          # Integration tests for all 7 guardrails
+│   └── test_server_endpoints.js  # HTTP endpoint verification
+├── .env.example                  # Environment configuration template
+├── .gitignore                    # Secrets, dependencies, and OS exclusions
+├── package.json                  # Dependencies, scripts, and project metadata
+├── tailwind.config.js            # Tailwind CSS configuration
+└── vite.config.js                # Vite build and path alias configuration
 ```
 
 ---

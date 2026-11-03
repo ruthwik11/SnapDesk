@@ -7,8 +7,11 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "build": "node node_modules/vite/bin/vite.js build",
     "eval": "node src/eval.js",
-    "test": "node test/test_pipeline.js"
+    "test": "node test/test_pipeline.js",
+    "test:platform": "node test/test_multitenant_platform.js",
+    "test:server": "node test/test_server_endpoints.js"
   },
   "keywords": [
     "meta-ai",
@@ -16,15 +19,33 @@
     "muse-spark",
     "customer-support",
     "computer-vision",
-    "agentic-ai"
+    "agentic-ai",
+    "renaissance-ui"
   ],
   "author": "Ruthwik",
   "license": "MIT",
   "dependencies": {
+    "@hugeicons/core-free-icons": "^4.4.0",
+    "@hugeicons/react": "^1.1.10",
     "@meta-sam/parser": "^0.1.0",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
+    "lenis": "^1.1.20",
+    "lucide-react": "^0.344.0",
     "multer": "^2.5.0",
-    "openai": "^7.47.0"
+    "ogl": "^1.0.11",
+    "openai": "^7.47.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "vite": "^5.3.1"
   }
 }

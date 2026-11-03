@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" width="100%" height="100%">
+  <defs>
+    <!-- White / Silver Master Gradients -->
+    <radialGradient id="wSymGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3" />
+      <stop offset="60%" stop-color="#E2E8F0" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="40%" stop-color="#F8FAFC" />
+      <stop offset="70%" stop-color="#E2E8F0" />
+      <stop offset="100%" stop-color="#CBD5E1" />
+    </linearGradient>
+
+    <linearGradient id="whiteGoldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7" />
+      <stop offset="50%" stop-color="#E8D5A3" />
+      <stop offset="100%" stop-color="#C5A869" />
+    </linearGradient>
+
+    <linearGradient id="wLaser" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#38BDF8" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2" />
+    </linearGradient>
+
+    <filter id="wShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.7" />
+    </filter>
+  </defs>
+
+  <!-- Left: Illustrated Emblem Symbol in Luminescent Platinum & Pale Gold -->
+  <g transform="translate(15, 15) scale(0.41)" filter="url(#wShadow)">
+    <circle cx="256" cy="256" r="230" fill="url(#wSymGlow)" />
+
+    <!-- Calibration Rings -->
+    <g stroke="url(#whiteGrad)" stroke-opacity="0.5" fill="none" stroke-width="1.5">
+      <circle cx="256" cy="256" r="218" stroke-dasharray="4, 8" />
+      <circle cx="256" cy="256" r="206" stroke-width="2.5" />
+      <line x1="256" y1="26" x2="256" y2="52" stroke-width="3" />
+      <line x1="256" y1="460" x2="256" y2="486" stroke-width="3" />
+      <line x1="26" y1="256" x2="52" y2="256" stroke-width="3" />
+      <line x1="460" y1="256" x2="486" y2="256" stroke-width="3" />
+    </g>
+
+    <!-- Hermes Winged Flourishes -->
+    <g fill="url(#whiteGrad)" opacity="0.95">
+      <path d="M 120 230 C 80 190, 50 140, 60 90 C 80 120, 105 150, 140 170 C 110 130, 90 90, 110 60 C 130 95, 160 135, 185 160 C 170 125, 160 90, 180 75 C 195 105, 215 145, 220 180 Z" opacity="0.9" />
+      <path d="M 392 230 C 432 190, 462 140, 452 90 C 432 120, 407 150, 372 170 C 402 130, 422 90, 402 60 C 382 95, 352 135, 327 160 C 342 125, 352 90, 332 75 C 317 105, 297 145, 292 180 Z" opacity="0.9" />
+    </g>
+
+    <!-- Central Isometric Delivery Parcel -->
+    <g>
+      <path d="M 256 120 L 360 175 L 256 230 L 152 175 Z" fill="#E2E8F0" stroke="url(#whiteGrad)" stroke-width="2.5" />
+      <path d="M 152 175 L 256 230 L 256 345 L 152 290 Z" fill="#64748B" stroke="#475569" stroke-width="2" />
+      <path d="M 256 230 L 360 175 L 360 290 L 256 345 Z" fill="#94A3B8" stroke="#475569" stroke-width="2" />
+      <!-- Ribbons -->
+      <path d="M 204 147 L 308 202 L 308 318 L 256 345" fill="none" stroke="url(#whiteGoldAccent)" stroke-width="5" />
+      <path d="M 308 147 L 204 202 L 204 318 L 256 345" fill="none" stroke="url(#whiteGoldAccent)" stroke-width="5" />
+    </g>
+
+    <!-- Optical Camera Aperture / AI Inspection Iris -->
+    <g>
+      <circle cx="256" cy="256" r="92" fill="#0B1320" stroke="url(#whiteGrad)" stroke-width="6" />
+      <circle cx="256" cy="256" r="54" fill="#030712" stroke="url(#whiteGoldAccent)" stroke-width="3" />
+      <!-- Da Vinci Golden Spiral -->
+      <path d="M 256 256 A 6 6 0 0 1 250 250 A 12 12 0 0 1 262 238 A 20 20 0 0 1 282 258 A 32 32 0 0 1 250 290" 
+            fill="none" stroke="url(#whiteGoldAccent)" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="256" y1="208" x2="256" y2="304" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4, 3" />
+      <line x1="208" y1="256" x2="304" y2="256" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4, 3" />
+      <circle cx="256" cy="256" r="14" fill="none" stroke="#38BDF8" stroke-width="2" />
+      <circle cx="256" cy="256" r="3.5" fill="#FFFFFF" />
+    </g>
+    <line x1="120" y1="256" x2="392" y2="256" stroke="url(#wLaser)" stroke-width="3" />
+  </g>
+
+  <!-- Vertical Divider Bar -->
+  <g transform="translate(250, 0)">
+    <line x1="0" y1="40" x2="0" y2="200" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.5" />
+    <circle cx="0" cy="40" r="3" fill="#FFFFFF" />
+    <circle cx="0" cy="120" r="4" fill="url(#whiteGoldAccent)" />
+    <circle cx="0" cy="200" r="3" fill="#FFFFFF" />
+  </g>
+
+  <!-- Right: Illustrated Typography "SNAPDESK" in Crisp White -->
+  <g transform="translate(285, 0)">
+    <text x="0" y="128" 
+          font-family="'Cinzel', 'Trajan Pro', 'Palatino Linotype', 'Georgia', serif" 
+          font-size="82" 
+          font-weight="700" 
+          letter-spacing="9" 
+          fill="url(#whiteGrad)"
+          filter="url(#wShadow)">SNAPDESK</text>
+
+    <!-- Optical Aperture Accent Dot -->
+    <circle cx="585" cy="85" r="4" fill="#38BDF8" />
+    <circle cx="585" cy="85" r="8" fill="none" stroke="#38BDF8" stroke-width="1.5" opacity="0.6" />
+
+    <!-- Subtitle Banner -->
+    <g transform="translate(4, 168)">
+      <line x1="0" y1="-8" x2="570" y2="-8" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1" />
+      <text x="0" y="16" 
+            font-family="'Inter', 'Trajan Pro', sans-serif" 
+            font-size="14.5" 
+            font-weight="600" 
+            letter-spacing="6.5" 
+            fill="#F1F5F9" 
+            opacity="0.95">AI VISION &amp; AUTOMATED RESOLUTION</text>
+      
+      <text x="500" y="16" 
+            font-family="'Cinzel', serif" 
+            font-size="12" 
+            letter-spacing="2" 
+            fill="#E2E8F0">EST. MMXXVI</text>
+    </g>
+  </g>
+</svg>
+

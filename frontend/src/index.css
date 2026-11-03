@@ -1,0 +1,132 @@
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Comfortaa.woff2') format('woff2');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Helvetica', 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  background-color: #07152e;
+}
+
+/* Headings, brand titles, and display elements use Comfortaa */
+h1, h2, h3, h4, h5, h6,
+h1 *, h2 *, h3 *, h4 *, h5 *, h6 *,
+.font-comfortaa, .font-comfortaa *,
+.font-serif, .font-serif * {
+  font-family: 'Comfortaa', cursive, sans-serif !important;
+}
+
+.font-helvetica, .font-sans {
+  font-family: 'Helvetica', 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #07152e;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e3a5f;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ede6db;
+}
+
+/* Smooth scrolling container */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Renaissance offwhite / beige silk foil effect */
+.gold-text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #f5efe6 50%, #ede6db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border-gradient {
+  border-image: linear-gradient(to bottom, #ede6db, rgba(237, 230, 219, 0.2)) 1;
+}
+
+/* Brushstroke mask simulation */
+.brushstroke-mask {
+  mask-image: radial-gradient(ellipse at center, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 60%, transparent 100%);
+}
+
+/* Parchment / Classical texture overlays */
+.parchment-texture {
+  background-image: url('/img/backgrounds/aged-paper.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.canvas-texture {
+  background-image: url('/img/textures/canvas-grain.webp');
+  background-size: repeat;
+}
+
+/* Japanese Curtain Reveal */
+.curtain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  pointer-events: none;
+  transition: opacity 0.8s ease-out;
+}
+
+.curtain-panel {
+  flex: 1;
+  height: 100%;
+  background: linear-gradient(180deg, #181512 0%, #0d0c0a 100%);
+  border-right: 1px solid rgba(212, 175, 55, 0.2);
+  transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+  will-change: transform;
+}
+
+.curtain-overlay.lifted .curtain-left {
+  transform: translateY(-100%);
+}
+
+.curtain-overlay.lifted .curtain-right {
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain-overlay {
+    display: none !important;
+  }
+}
+

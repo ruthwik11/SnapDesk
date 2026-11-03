@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Master Gradients -->
+    <radialGradient id="symGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#AA7A1E" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="goldLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF3D1" />
+      <stop offset="25%" stop-color="#E5C158" />
+      <stop offset="60%" stop-color="#B8860B" />
+      <stop offset="100%" stop-color="#6A4E0B" />
+    </linearGradient>
+
+    <linearGradient id="goldDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B8860B" />
+      <stop offset="50%" stop-color="#73520A" />
+      <stop offset="100%" stop-color="#3A2803" />
+    </linearGradient>
+
+    <linearGradient id="laserCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#00F0FF" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2" />
+    </linearGradient>
+
+    <linearGradient id="parcelTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C29B38" />
+      <stop offset="100%" stop-color="#8C6615" />
+    </linearGradient>
+    <linearGradient id="parcelLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B4B0C" />
+      <stop offset="100%" stop-color="#3D2904" />
+    </linearGradient>
+    <linearGradient id="parcelRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9E751D" />
+      <stop offset="100%" stop-color="#543A08" />
+    </linearGradient>
+
+    <filter id="symShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.75" />
+    </filter>
+    <filter id="glowGold" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Golden Halo -->
+  <circle cx="256" cy="256" r="230" fill="url(#symGlow)" />
+
+  <!-- Outer Da Vinci Vitruvian Calibration Rings -->
+  <g stroke="url(#goldLight)" stroke-opacity="0.45" fill="none" stroke-width="1.2">
+    <circle cx="256" cy="256" r="218" stroke-dasharray="4, 8" />
+    <circle cx="256" cy="256" r="206" stroke-width="2" />
+    <circle cx="256" cy="256" r="196" stroke-dasharray="1, 5" stroke-width="1.5" />
+    
+    <!-- Coordinate Cardinal Ticks -->
+    <line x1="256" y1="26" x2="256" y2="52" stroke-width="2.5" />
+    <line x1="256" y1="460" x2="256" y2="486" stroke-width="2.5" />
+    <line x1="26" y1="256" x2="52" y2="256" stroke-width="2.5" />
+    <line x1="460" y1="256" x2="486" y2="256" stroke-width="2.5" />
+
+    <!-- 45-degree ticks -->
+    <line x1="93" y1="93" x2="111" y2="111" stroke-width="1.5" />
+    <line x1="419" y1="93" x2="401" y2="111" stroke-width="1.5" />
+    <line x1="93" y1="419" x2="111" y2="401" stroke-width="1.5" />
+    <line x1="419" y1="419" x2="401" y2="401" stroke-width="1.5" />
+  </g>
+
+  <!-- Hermes Winged Flourishes (Courier & Dispatch Crest) -->
+  <g fill="url(#goldLight)" filter="url(#symShadow)" opacity="0.9">
+    <!-- Left Wing Feathers -->
+    <path d="M 120 230 C 80 190, 50 140, 60 90 C 80 120, 105 150, 140 170 C 110 130, 90 90, 110 60 C 130 95, 160 135, 185 160 C 170 125, 160 90, 180 75 C 195 105, 215 145, 220 180 Z" opacity="0.85" />
+    <!-- Right Wing Feathers (Mirrored) -->
+    <path d="M 392 230 C 432 190, 462 140, 452 90 C 432 120, 407 150, 372 170 C 402 130, 422 90, 402 60 C 382 95, 352 135, 327 160 C 342 125, 352 90, 332 75 C 317 105, 297 145, 292 180 Z" opacity="0.85" />
+  </g>
+
+  <!-- Central Isometric Renaissance Delivery Parcel -->
+  <g id="isometricParcel" filter="url(#symShadow)">
+    <!-- Top Face (Rhombus) -->
+    <path d="M 256 120 L 360 175 L 256 230 L 152 175 Z" fill="url(#parcelTop)" stroke="url(#goldLight)" stroke-width="2" />
+    <!-- Left Face -->
+    <path d="M 152 175 L 256 230 L 256 345 L 152 290 Z" fill="url(#parcelLeft)" stroke="url(#goldDark)" stroke-width="1.5" />
+    <!-- Right Face -->
+    <path d="M 256 230 L 360 175 L 360 290 L 256 345 Z" fill="url(#parcelRight)" stroke="url(#goldDark)" stroke-width="1.5" />
+
+    <!-- Renaissance Binding Ribbons & Seal Straps -->
+    <!-- Top Straps -->
+    <path d="M 204 147 L 308 202 L 308 318 L 256 345" fill="none" stroke="url(#goldLight)" stroke-width="4.5" opacity="0.95" />
+    <path d="M 308 147 L 204 202 L 204 318 L 256 345" fill="none" stroke="url(#goldLight)" stroke-width="4.5" opacity="0.95" />
+  </g>
+
+  <!-- Optical Camera Aperture / AI Inspection Iris (The "Snap" Engine) -->
+  <g id="visionAperture" filter="url(#glowGold)">
+    <!-- Outer Golden Brass Bezel -->
+    <circle cx="256" cy="256" r="92" fill="#120E06" stroke="url(#goldLight)" stroke-width="5" />
+    <circle cx="256" cy="256" r="82" fill="none" stroke="url(#goldDark)" stroke-width="2" stroke-dasharray="3, 3" />
+
+    <!-- 8 Aperture Blades -->
+    <g fill="none" stroke="url(#goldLight)" stroke-width="2.5" opacity="0.8">
+      <path d="M 256 174 C 290 185, 320 215, 328 256" />
+      <path d="M 314 198 C 330 230, 330 270, 308 308" />
+      <path d="M 338 256 C 327 290, 297 320, 256 328" />
+      <path d="M 314 314 C 282 330, 242 330, 204 308" />
+      <path d="M 256 338 C 222 327, 192 297, 184 256" />
+      <path d="M 198 314 C 182 282, 182 242, 204 204" />
+      <path d="M 174 256 C 185 222, 215 192, 256 184" />
+      <path d="M 198 198 C 230 182, 270 182, 308 204" />
+    </g>
+
+    <!-- Deep Lens Pupil -->
+    <radialGradient id="pupilLens" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#1E3A5F" />
+      <stop offset="45%" stop-color="#0B1524" />
+      <stop offset="85%" stop-color="#020509" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+    <circle cx="256" cy="256" r="54" fill="url(#pupilLens)" stroke="url(#goldLight)" stroke-width="2.5" />
+
+    <!-- Da Vinci Golden Spiral Inscribed within Lens -->
+    <path d="M 256 256 A 6 6 0 0 1 250 250 A 12 12 0 0 1 262 238 A 20 20 0 0 1 282 258 A 32 32 0 0 1 250 290 A 48 48 0 0 1 208 242" 
+          fill="none" stroke="url(#goldLight)" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+
+    <!-- AI Laser Crosshair & Damage Coordinate Scan -->
+    <line x1="256" y1="208" x2="256" y2="304" stroke="#00F0FF" stroke-width="1.5" stroke-dasharray="4, 3" opacity="0.8" />
+    <line x1="208" y1="256" x2="304" y2="256" stroke="#00F0FF" stroke-width="1.5" stroke-dasharray="4, 3" opacity="0.8" />
+    
+    <!-- Precision Target Reticle -->
+    <circle cx="256" cy="256" r="14" fill="none" stroke="#00F0FF" stroke-width="1.5" />
+    <circle cx="256" cy="256" r="3" fill="#FFF3D1" />
+  </g>
+
+  <!-- Laser Scan Horizontal Sweep Beam -->
+  <line x1="120" y1="256" x2="392" y2="256" stroke="url(#laserCyan)" stroke-width="2.5" />
+
+  <!-- Lower Roman Numerals / Motto Seal Scroll: "VERITAS IN RE" (Truth in the matter) -->
+  <g transform="translate(256, 436)" text-anchor="middle" font-family="'Cinzel', Georgia, serif">
+    <rect x="-100" y="-14" width="200" height="26" rx="4" fill="#18130B" stroke="url(#goldLight)" stroke-width="1.2" opacity="0.9" />
+    <text y="4" font-size="10.5" fill="url(#goldLight)" letter-spacing="3" font-weight="bold">SNAPDESK • MMXIV</text>
+  </g>
+</svg>
+
