@@ -5,6 +5,7 @@
 
 import crypto from 'node:crypto';
 import { authService } from '../services/auth.js';
+import { supabase, isSupabaseConfigured } from '../services/supabase.js';
 
 class TenantStore {
   constructor() {
@@ -27,8 +28,118 @@ class TenantStore {
   async init() {
     if (this.initialized) return;
     this.seedTenantsAndUsers();
+    if (isSupabaseConfigured) {
+      await this.syncFromSupabase();
+    }
     this.initialized = true;
     console.log(`[TenantStore] Initialized with ${this.businesses.size} tenants and ${this.cases.size} cases.`);
+  }
+
+  async syncFromSupabase() {
+    try {
+      const { data: bList } = await supabase.from('businesses').select('*');
+      if (bList && bList.length > 0) {
+        bList.forEach((b) => {
+          this.businesses.set(b.id, {
+            id: b.id,
+            name: b.name,
+            category: b.category,
+            displayDescription: b.display_description,
+            contactEmail: b.contact_email,
+            contactPhone: b.contact_phone,
+            active: b.active ?? true,
+            createdAt: b.created_at,
+          });
+        });
+      }
+
+      const { data: uList } = await supabase.from('users').select('*');
+      if (uList && uList.length > 0) {
+        uList.forEach((u) => {
+          this.users.set(u.id, {
+            id: u.id,
+            email: u.email,
+            salt: u.salt,
+            hash: u.hash,
+            name: u.name,
+            role: u.role,
+            businessId: u.business_id,
+            phone: u.phone,
+            createdAt: u.created_at,
+          });
+        });
+      }
+
+      const { data: pList } = await supabase.from('policy_versions').select('*');
+      if (pList && pList.length > 0) {
+        pList.forEach((p) => {
+          this.policyVersions.set(p.version_id, {
+            versionId: p.version_id,
+            businessId: p.business_id,
+            versionNumber: p.version_number,
+            name: p.name,
+            rawText: p.raw_text,
+            rules: p.rules || {},
+            prompts: p.prompts || {},
+            clauses: p.clauses || {},
+            status: p.status,
+            effectiveDate: p.effective_date,
+            createdBy: p.created_by,
+            createdAt: p.created_at,
+          });
+        });
+      }
+
+      const { data: tList } = await supabase.from('threshold_versions').select('*');
+      if (tList && tList.length > 0) {
+        tList.forEach((t) => {
+          this.thresholdVersions.set(t.version_id, {
+            versionId: t.version_id,
+            businessId: t.business_id,
+            policyVersionId: t.policy_version_id,
+            versionNumber: t.version_number,
+            rules: t.rules || {},
+            createdAt: t.created_at,
+          });
+        });
+      }
+
+      const { data: cList } = await supabase.from('cases').select('*');
+      if (cList && cList.length > 0) {
+        cList.forEach((c) => {
+          this.cases.set(c.id, {
+            id: c.id,
+            caseNumber: c.case_number,
+            businessId: c.business_id,
+            customerId: c.customer_id,
+            customerName: c.customer_name,
+            customerPhone: c.customer_phone,
+            postalCode: c.postal_code,
+            productId: c.product_id,
+            productName: c.product_name,
+            productCostReported: c.product_cost_reported,
+            productCostVerified: c.product_cost_verified,
+            writtenComplaint: c.written_complaint,
+            voiceTranscript: c.voice_transcript,
+            status: c.status,
+            outcome: c.outcome,
+            outcomeStatus: c.outcome_status,
+            handlingBadge: c.handling_badge,
+            policyVersionId: c.policy_version_id,
+            thresholdVersionId: c.threshold_version_id,
+            damageReportId: c.damage_report_id,
+            mediaAssets: c.media_assets || [],
+            measurements: c.measurements || {},
+            decision: c.decision || {},
+            createdAt: c.created_at,
+            updatedAt: c.updated_at,
+          });
+        });
+      }
+      console.log(`[Supabase] Synced remote state: ${this.businesses.size} tenants, ${this.users.size} users, ${this.cases.size} cases.`);
+    } catch (err) {
+      console.warn('[Supabase] Initial sync warning:', err.message);
+    }
   }
 
   // --- SEEDING ---
@@ -286,16 +397,54 @@ class TenantStore {
 
   addUser(user) {
     this.users.set(user.id, user);
+    if (isSupabaseConfigured) {
+      supabase.from('users').upsert({
+        id: user.id,
+        email: user.email,
+        salt: user.salt,
+        hash: user.hash,
+        name: user.name,
+        role: user.role,
+        business_id: user.businessId || null,
+        phone: user.phone || null,
+        created_at: user.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] addUser error:', e.message));
+    }
     return user;
   }
 
   addBusiness(biz) {
     this.businesses.set(biz.id, biz);
+    if (isSupabaseConfigured) {
+      supabase.from('businesses').upsert({
+        id: biz.id,
+        name: biz.name,
+        category: biz.category,
+        display_description: biz.displayDescription,
+        contact_email: biz.contactEmail,
+        contact_phone: biz.contactPhone,
+        active: biz.active ?? true,
+        created_at: biz.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] addBusiness error:', e.message));
+    }
     return biz;
   }
 
   addProduct(product) {
     this.products.set(product.id, product);
+    if (isSupabaseConfigured) {
+      supabase.from('products').upsert({
+        id: product.id,
+        business_id: product.businessId,
+        sku: product.sku,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        return_window_days: product.returnWindowDays || 14,
+        active: product.active ?? true,
+        created_at: product.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] addProduct error:', e.message));
+    }
     return product;
   }
 
@@ -320,6 +469,22 @@ class TenantStore {
 
   savePolicyVersion(policyVersion) {
     this.policyVersions.set(policyVersion.versionId, policyVersion);
+    if (isSupabaseConfigured) {
+      supabase.from('policy_versions').upsert({
+        version_id: policyVersion.versionId,
+        business_id: policyVersion.businessId,
+        version_number: policyVersion.versionNumber,
+        name: policyVersion.name,
+        raw_text: policyVersion.rawText,
+        rules: policyVersion.rules,
+        prompts: policyVersion.prompts,
+        clauses: policyVersion.clauses,
+        status: policyVersion.status,
+        effective_date: policyVersion.effectiveDate || new Date().toISOString(),
+        created_by: policyVersion.createdBy,
+        created_at: policyVersion.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] savePolicyVersion error:', e.message));
+    }
     return policyVersion;
   }
 
@@ -332,6 +497,16 @@ class TenantStore {
 
   saveThresholdVersion(thresholdVersion) {
     this.thresholdVersions.set(thresholdVersion.versionId, thresholdVersion);
+    if (isSupabaseConfigured) {
+      supabase.from('threshold_versions').upsert({
+        version_id: thresholdVersion.versionId,
+        business_id: thresholdVersion.businessId,
+        policy_version_id: thresholdVersion.policyVersionId,
+        version_number: thresholdVersion.versionNumber,
+        rules: thresholdVersion.rules,
+        created_at: thresholdVersion.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] saveThresholdVersion error:', e.message));
+    }
     return thresholdVersion;
   }
 
@@ -347,6 +522,36 @@ class TenantStore {
 
     this.cases.set(caseData.id, caseData);
     this.logAudit(caseData.businessId, caseData.customerName || 'Customer', 'CASE_SUBMITTED', `New ticket filed: ${caseData.caseNumber}`);
+
+    if (isSupabaseConfigured) {
+      supabase.from('cases').insert({
+        id: caseData.id,
+        case_number: caseData.caseNumber,
+        business_id: caseData.businessId,
+        customer_id: caseData.customerId || null,
+        customer_name: caseData.customerName,
+        customer_phone: caseData.customerPhone,
+        postal_code: caseData.postalCode,
+        product_id: caseData.productId || null,
+        product_name: caseData.productName || null,
+        product_cost_reported: caseData.productCostReported || null,
+        product_cost_verified: caseData.productCostVerified || null,
+        written_complaint: caseData.writtenComplaint || null,
+        voice_transcript: caseData.voiceTranscript || null,
+        status: caseData.status,
+        outcome: caseData.outcome || null,
+        outcome_status: caseData.outcomeStatus || null,
+        handling_badge: caseData.handlingBadge || null,
+        policy_version_id: caseData.policyVersionId || null,
+        threshold_version_id: caseData.thresholdVersionId || null,
+        damage_report_id: caseData.damageReportId || null,
+        media_assets: caseData.mediaAssets || [],
+        measurements: caseData.measurements || {},
+        decision: caseData.decision || {},
+        created_at: caseData.createdAt,
+        updated_at: caseData.updatedAt,
+      }).catch((e) => console.warn('[Supabase] createCase error:', e.message));
+    }
     return caseData;
   }
 
@@ -359,6 +564,19 @@ class TenantStore {
     if (!existing) return null;
     const updated = { ...existing, ...patch, updatedAt: new Date().toISOString() };
     this.cases.set(caseId, updated);
+
+    if (isSupabaseConfigured) {
+      supabase.from('cases').update({
+        status: updated.status,
+        outcome: updated.outcome,
+        outcome_status: updated.outcomeStatus,
+        handling_badge: updated.handlingBadge,
+        damage_report_id: updated.damageReportId,
+        measurements: updated.measurements,
+        decision: updated.decision,
+        updated_at: updated.updatedAt,
+      }).eq('id', caseId).catch((e) => console.warn('[Supabase] updateCase error:', e.message));
+    }
     return updated;
   }
 
@@ -386,6 +604,26 @@ class TenantStore {
 
   saveDamageReport(report) {
     this.damageReports.set(report.reportId, report);
+    if (isSupabaseConfigured) {
+      supabase.from('damage_reports').upsert({
+        report_id: report.reportId,
+        case_id: report.caseId,
+        business_id: report.businessId,
+        customer_name: report.customerName,
+        title: report.title,
+        status: report.status,
+        assessment_status: report.assessmentStatus,
+        damage_ratio: report.damageRatio,
+        damage_ratio_formatted: report.damageRatioFormatted,
+        product_found: report.productFound,
+        contents_damaged: report.contentsDamaged,
+        video_timestamps: report.videoTimestamps || [],
+        measurements: report.measurements || {},
+        regions: report.regions || [],
+        overall_findings: report.overallFindings || [],
+        created_at: report.createdAt || new Date().toISOString(),
+      }).catch((e) => console.warn('[Supabase] saveDamageReport error:', e.message));
+    }
     return report;
   }
 
@@ -406,21 +644,45 @@ class TenantStore {
     });
 
     this.logAudit(review.businessId, review.reviewerName, 'HUMAN_REVIEW_ACTION', `Case ${review.caseId} decided as ${review.action}: ${review.notes}`);
+
+    if (isSupabaseConfigured) {
+      supabase.from('human_reviews').insert({
+        review_id: review.reviewId,
+        case_id: review.caseId,
+        business_id: review.businessId,
+        reviewer_name: review.reviewerName,
+        action: review.action,
+        notes: review.notes,
+        timestamp: review.timestamp,
+      }).catch((e) => console.warn('[Supabase] addHumanReview error:', e.message));
+    }
     return review;
   }
 
   // --- AUDIT & NOTIFICATIONS ---
 
   logAudit(businessId, actor, action, details) {
-    this.auditLogs.unshift({
+    const logItem = {
       id: `log_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       businessId,
       actor,
       action,
       details,
       timestamp: new Date().toISOString(),
-    });
+    };
+    this.auditLogs.unshift(logItem);
     if (this.auditLogs.length > 200) this.auditLogs.pop();
+
+    if (isSupabaseConfigured) {
+      supabase.from('audit_logs').insert({
+        id: logItem.id,
+        business_id: logItem.businessId,
+        actor: logItem.actor,
+        action: logItem.action,
+        details: logItem.details,
+        timestamp: logItem.timestamp,
+      }).catch((e) => console.warn('[Supabase] logAudit error:', e.message));
+    }
   }
 
   getAuditLogsByBusiness(businessId) {
