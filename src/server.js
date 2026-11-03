@@ -79,12 +79,14 @@ app.get('/api/system', (req, res) => {
   });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`\n================================================================`);
-  console.log(`  SnapDesk Multi-Tenant Server running on http://localhost:${PORT}  `);
-  console.log(`  Mode: ${SNAPDESK_MODE.toUpperCase()} | Spark: ${SPARK_MODEL} | SAM: ${SAM_MODEL}  `);
-  console.log(`================================================================\n`);
-});
+// Start Server only in standalone mode (not in Vercel serverless functions)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n================================================================`);
+    console.log(`  SnapDesk Multi-Tenant Server running on http://localhost:${PORT}  `);
+    console.log(`  Mode: ${SNAPDESK_MODE.toUpperCase()} | Spark: ${SPARK_MODEL} | SAM: ${SAM_MODEL}  `);
+    console.log(`================================================================\n`);
+  });
+}
 
 export default app;

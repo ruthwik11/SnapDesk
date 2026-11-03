@@ -8,3 +8,4 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseKey)
   : null;
+

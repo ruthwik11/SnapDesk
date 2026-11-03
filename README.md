@@ -267,7 +267,29 @@ SD-f&b/
 
 ---
 
-## 10. Acknowledgements & References
+## 10. Deployment (All-in-One on Vercel)
+
+SnapDesk is configured for zero-configuration, all-in-one deployment on **Vercel** with fullstack serverless execution:
+
+### 1-Click Setup:
+1. Go to [Vercel](https://vercel.com/) and click **Add New Project**.
+2. Select your imported GitHub repository: `ruthwik11/SnapDesk`.
+3. In **Environment Variables**, add the following:
+   - `MODEL_API_KEY`: Your Meta Model API key (`LLM_...`)
+   - `SNAPDESK_MODE`: `real` (or `mock`)
+   - `SUPABASE_URL`: Your Supabase Project URL (`https://<project-id>.supabase.co`)
+   - `SUPABASE_ANON_KEY`: Your Supabase Publishable / Anon key
+   - `VITE_SUPABASE_URL`: Same Supabase Project URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`: Same Supabase Publishable / Anon key
+4. Click **Deploy**.
+
+Vercel will:
+- Run `npm run build` to compile the Vite + React frontend into static assets served via the Vercel Edge Network.
+- Mount `api/index.js` as an auto-scaling Node.js Serverless Function responding to all `/api/*` routes.
+
+---
+
+## 11. Acknowledgements & References
 
 - Developed by **Ruthwik** for the **Meta Global AI Developer Hackathon 2026** (Cerebral Valley x Meta).
 - Reference recipes derived under the MIT license from [meta-model-cookbook](https://github.com/meta-llama/meta-model-cookbook):
