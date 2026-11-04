@@ -1,4 +1,4 @@
-# SnapDesk — Customer Support That Can See
+# SnapDesk — Customer Support That Can See ((snap-desk.vercel.app))
 
 > **Autonomous Visual Damage Triage & Policy Enforcement Agent**  
 > Built for the **Meta Global AI Developer Hackathon 2026** (Indie Developer Track — *Push the Frontier* & *Best Agentic Use-Case*).
